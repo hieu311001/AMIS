@@ -36,11 +36,13 @@
                             <div class="popup-left__2">
                                 <div class="popup-department">
                                     <label for="" class="m-label">Đơn vị <span class="required">*</span></label>
-                                    <BaseInput Class="popup-input popup-input__icon" inputClass="m-input" id="departmentName" Required="true">
+                                    <!-- <BaseInput Class="popup-input popup-input__icon" inputClass="m-input" id="departmentName" Required="true">
                                         <div class="icon-department">
                                             <div class="icon icon-department__arrow"></div>
                                         </div>
-                                    </BaseInput>
+                                    </BaseInput> -->
+                                    <BaseCombobox id="departmentName" class="combobox" Required="true"
+                                        value="" url="https://cukcuk.manhnv.net/api/v1/Departments" propValue="DepartmentId" propText="DepartmentName"/>
                                 </div>
                             </div>
                             <div class="popup-left__3">
@@ -54,7 +56,7 @@
                             <div class="popup-right__1">
                                 <div class="popup-birthday">
                                     <label for="" class="m-label">Ngày sinh</label>
-                                    <BaseInput Class="popup-input popup-input__icon" inputClass="m-input m-input-date" placeholder="DD/MM/YYYY" id="dateOfBirth" DataType="Date">
+                                    <BaseInput Class="popup-input popup-input__icon" type="date" inputClass="m-input m-input-date" placeholder="DD/MM/YYYY" id="dateOfBirth" DataType="Date">
                                         <div class="icon-department">
                                             <div class="icon icon-date"></div>
                                         </div>
@@ -85,7 +87,7 @@
                                 </div>
                                 <div class="popup-identityDate">
                                     <label for="" class="m-label">Ngày cấp</label>
-                                    <BaseInput Class="popup-input popup-input__icon" inputClass="m-input m-input-date" placeholder="DD/MM/YYYY" id="identityDate" DataType="Date">
+                                    <BaseInput Class="popup-input popup-input__icon" type="date" inputClass="m-input m-input-date" placeholder="DD/MM/YYYY" id="identityDate" DataType="Date">
                                         <div class="icon-department">
                                             <div class="icon icon-date"></div>
                                         </div>
@@ -143,21 +145,15 @@
                         <div class="popup-footer__btn">
                             <div class="popup-btn__left">
                                 <div class="popup-btn__cancel">
-                                    <button class="ms-button" @click="closeForm">
-                                        <div>Hủy</div>
-                                    </button>
+                                    <BaseButton text="Hủy" class="ms-button w-600" @click="closeForm"/>   
                                 </div>
                             </div>
                             <div class="popup-btn__right">
                                 <div class="popup-btn__store" style="padding: 0 0.75rem;">
-                                    <button class="ms-button" @click="handleStore">
-                                        <div>Cất</div>
-                                    </button>
+                                    <BaseButton text="Cất" class="ms-button w-600" @click="handleStore"/>                                     
                                 </div>
                                 <div class="popup-btn__save">
-                                    <button class="m-button" @click="handleSave">
-                                        <div>Cất và thêm</div>
-                                    </button>
+                                    <BaseButton text="Cất và thêm" class="m-button w-600" @click="handleSave"/>   
                                 </div>
                             </div>
                         </div>
@@ -171,27 +167,48 @@
 
 <script>
 import BaseInput from '@/base/Input/BaseInput.vue';
+import BaseCombobox from '@/base/Combobox/BaseCombobox.vue';
+import BaseButton from '@/base/Button/BaseButton.vue';
 import {
-    addEmployee
+    addEmployee, editEmployee
 } from '../utils/saveEmployee';
+import {
+    getDepartment
+} from '../utils/getDepartment';
+// import {
+//     getPosition
+// } from '../utils/getPosition';
 
 export default {
     props: {
-        showForm: {
-            type: Boolean,
-            default: false
-        }
+
     },
     components: {
-        BaseInput
+        BaseInput,
+        BaseCombobox,
+        BaseButton,
     },
     data() {
         return {
             FormMode: {
                 Add: 1,
-                Save: 2
+                Edit: 2
+            },
+            required: {
+                employeeCode: "employeeCode",
+                fullName: "fullName",
+                departmentName: "departmentName",
+            },
+            error: {
+                code: "Mã không được để trống",
+                name: "Tên không được để trống",
+                department: "Đơn vị không được để trống",
+                date: "Thời gian vượt qua thời điểm hiện tại",
+                email: "Email không đúng định dạng",
             },
             CurrentFormMode: 1,
+            showForm: false,
+            employeeId: "",
         }
     },
     methods: {
@@ -201,7 +218,9 @@ export default {
          */
         closeForm() {
             this.$emit("handleCloseForm");
+            this.emitter.emit("closeForm");
             this.resetForm();
+            console.log(this.$refs.form);
         },
         /**
          * Reset form khi add xong
@@ -228,7 +247,8 @@ export default {
          */
         validateForm() {
             let me = this.$el,
-                isValid = true;
+                isValid = true, 
+                error = [];
 
             // Validate trường Required
             me.querySelectorAll('[Required]').forEach((required) => {
@@ -238,7 +258,18 @@ export default {
                     isValid = false;
 
                     val.classList.add("m-input__error");
-                    val.setAttribute("title", "Không được để trống");
+
+                    if(val.id == this.required.employeeCode || required.id == this.required.employeeCode){
+                        val.setAttribute("title", this.error.code);
+                        error.push(this.error.code);
+                    } else if (val.id == this.required.fullName || required.id == this.required.fullName){
+                        val.setAttribute("title", this.error.name);
+                        error.push(this.error.name);
+                    } else if (val.id == this.required.departmentName || required.id == this.required.departmentName){
+                        val.setAttribute("title", this.error.department);
+                        error.push(this.error.department)
+                    }
+                    
                 } else {
                     val.setAttribute("title", "");
                     val.classList.remove("m-input__error");
@@ -254,7 +285,8 @@ export default {
                     isValid = false;
 
                     val.classList.add("m-input__error");
-                    val.setAttribute("title", "Thời gian vượt quá thời điểm hiện tại");
+                    val.setAttribute("title", this.error.date);
+                    error.push(this.error.date);
                 } else {
                     val.setAttribute("title", "");
                     val.classList.remove("m-input__error");
@@ -267,17 +299,19 @@ export default {
                 if (!val.value
                     .match(
                         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-                    ) && val.value) {
+                    ) && val.value.replace(/\s/g, '').length > 0) {
                     isValid = false;
 
                     val.classList.add("m-input__error");
-                    val.setAttribute("title", "Email không đúng định dạng");
+                    val.setAttribute("title", this.error.email);
+                    error.push(this.error.email);
                 } else {
                     val.setAttribute("title", "");
                     val.classList.remove("m-input__error");
                 }
             })
 
+            this.emitter.emit("openPopupError", error);
             return isValid;
         },
         /**
@@ -290,14 +324,15 @@ export default {
             let employee = {
                 "EmployeeCode": me.querySelector("#employeeCode").value,
                 "FullName": me.querySelector("#fullName").value,
-                "DepartmentName": me.querySelector("#departmentName").value,
-                "PositionName": me.querySelector("#positionName").value,
+                "DepartmentId": me.querySelector("#departmentName").value,
+                "PositionID": me.querySelector("#positionName").value,
                 "DateOfBirth": me.querySelector("#dateOfBirth").value,
                 "IdentityNumber": me.querySelector("#identityNumber").value,
                 "IdentityDate": me.querySelector("#identityDate").value,
                 "IdentityPlace": me.querySelector("#identityPlace").value,
                 "Address": me.querySelector("#address").value,
-                "PhoneNumber": me.querySelector("#phoneNumber").value
+                "PhoneNumber": me.querySelector("#phoneNumber").value,
+                "Email": me.querySelector("#email").value
             }
 
             var checkbox = document.getElementsByName("gender");
@@ -306,6 +341,8 @@ export default {
                     employee["Gender"] = checkbox[i].value
                 }
             }
+
+            console.log(employee);
 
             return employee;
         },
@@ -320,12 +357,22 @@ export default {
 
             if (isValid) {
                 employee = this.getDataForm();
-                status = await addEmployee(employee);
+                if (this.CurrentFormMode == this.FormMode.Add){
+                    status = await addEmployee(employee);
 
-                if(status == 201) {
+                    if (status == 201) {
                     this.resetForm();
                     this.closeForm();
                     this.$emit("resetTable");
+                    }
+                } else if ( this.CurrentFormMode == this.FormMode.Edit) {
+                    status = await editEmployee(employee, this.employeeId);
+
+                    if (status == 200) {
+                    this.resetForm();
+                    this.closeForm();
+                    this.$emit("resetTable");
+                    }
                 }
             }
         },
@@ -340,12 +387,37 @@ export default {
 
             if (isValid) {
                 employee = this.getDataForm();
-                status = await addEmployee(employee);
+                if (this.CurrentFormMode == this.FormMode.Add){
+                    status = await addEmployee(employee);
 
-                if(status == 201) {
+                    if (status == 201) {
                     this.resetForm();
                     this.$emit("resetTable");
+                    }
+                } else if ( this.CurrentFormMode == this.FormMode.Edit) {
+                    status = await editEmployee(employee, this.employeeId);
+
+                    if (status == 200) {
+                    this.resetForm();
+                    this.$emit("resetTable");
+                    }
                 }
+
+                
+            }
+        },
+        formatDate(date) {
+            try {
+                if (date) {
+                    date = new Date(date);
+                    let newDate = ("0" + date.getDate()).slice(-2),
+                        newMonth = ("0" + (date.getMonth() + 1)).slice(-2),
+                        newYear = date.getFullYear();
+
+                    return `${newDate}/${newMonth}/${newYear}`;
+                }
+            } catch (error) {
+                console.log(error);
             }
         }
     },
@@ -353,9 +425,82 @@ export default {
         // Mặc định form là thêm mới
         this.CurrentFormMode = this.FormMode.Add;
 
-        this.emitter.on("openEditForm", (employeeData) => {
-            console.log(employeeData, 123);
-        })
+        setTimeout(() => {
+            this.emitter.on("openAddForm", () => {
+                this.showForm = true;
+                this.CurrentFormMode = this.FormMode.Add;
+            })
+            /**
+             * Bắt sự kiện ấn nút mở form sửa
+             */
+            this.emitter.on("openEditForm", async (employeeData) => {
+                let me = this.$el,
+                    dateOfBirth,
+                    identityDate;
+                this.showForm = true;
+                // Đổi sang mode sửa
+                this.CurrentFormMode = this.FormMode.Edit;
+                // Lưu id của nhân viên cần sửa
+                this.employeeId = employeeData.EmployeeId;
+
+                console.log(employeeData)
+
+                // Binding dữ liệu ra các ô input
+                if (employeeData.DateOfBirth) {
+                    dateOfBirth = this.formatDate(employeeData.DateOfBirth);
+                    me.querySelector("#dateOfBirth").value = dateOfBirth;
+                }
+
+                if (employeeData.IdentityDate) {
+                    identityDate = this.formatDate(employeeData.IdentityDate);
+                    me.querySelector("#identityDate").value = identityDate;
+                }
+
+                me.querySelector("#employeeCode").value = employeeData.EmployeeCode;
+                me.querySelector("#fullName").value = employeeData.FullName;
+                me.querySelector("#positionName").value = employeeData.PositionName;
+                me.querySelector("#identityNumber").value = employeeData.IdentityNumber;
+                me.querySelector("#identityPlace").value = employeeData.IdentityPlace;
+                me.querySelector("#address").value = employeeData.Address;
+                me.querySelector("#phoneNumber").value = employeeData.PhoneNumber;
+                me.querySelector("#email").value = employeeData.Email;
+
+                me.querySelectorAll("[name = 'gender']").forEach((gender) => {
+                    if (gender.value == employeeData.Gender) {
+                        gender.checked = true;
+                    } else {
+                        gender.checked = false;
+                    }
+                })
+
+                if (employeeData.DepartmentId) {
+                    let department = await getDepartment(employeeData.DepartmentId);
+
+                    me.querySelector("#departmentName input").value = department.DepartmentName;
+                }
+
+                // if (employeeData.PositionId) {
+                //     let position = await getPosition(employeeData.PositionId);
+
+                //     me.querySelector("#positionName input").value = position.PositionName;
+                // }
+            })
+            /**
+             * Lắng nghe sự kiện ấn nút đóng form
+             * CreatBy VMHieu 07/08/2022
+             */
+            this.emitter.on("closeForm", () => {
+                this.showForm = false;
+            })
+            /**
+             * 
+             */
+            this.emitter.on("getValue", val => {
+                let me = this.$el;
+
+                me.querySelector("#departmentName").value = val[0];
+            })
+        }, 1);
     }
 }
 </script>
@@ -372,6 +517,7 @@ export default {
     min-width: 900px;
     resize: both;
     border-radius: 4px;
+    transition: all .2s ;
 }
 
 .popup-content,

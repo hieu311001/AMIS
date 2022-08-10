@@ -32,6 +32,10 @@
     transition: all .2s ease;
 }
 
+.w-600{
+    font-weight: 600;
+}
+
 .ms-button:hover {
     background-color: #d2d3d6;
 }

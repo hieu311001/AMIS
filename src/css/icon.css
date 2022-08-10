@@ -122,3 +122,19 @@
 .icon-date{
     background: url(../assets/Sprites.5c668001.png) no-repeat -124px -308px;
 }
+
+#iconWarning{
+    background: url(../assets/Sprites.5c668001.png) no-repeat -592px -456px;
+}
+
+#iconError{
+    background: url(../assets/Sprites.5c668001.png) no-repeat -24px -954px;
+}
+
+#iconQuestion{
+    background: url(../assets/Sprites.5c668001.png) no-repeat -826px -456px;
+}
+
+#iconSuccess{
+    background: url(../assets/Sprites.5c668001.png) no-repeat -96px -962px;
+}

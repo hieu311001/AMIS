@@ -9,16 +9,12 @@
     <div class="main-body">
         <div class="main-body__filter">
             <div class="ms-input filter-input">
-                <BaseInput 
-                Class="ms-input filter-input"
-                inputClass="input-search filter-input__search" 
-                placeholder="Tìm kiếm theo tên, mã nhân viên" 
-                >
+                <BaseInput Class="ms-input filter-input" inputClass="input-search filter-input__search" placeholder="Tìm kiếm theo tên, mã nhân viên">
                     <div class="input-search__icon"></div>
                 </BaseInput>
             </div>
             <div class="btn-refresh">
-                <div class="icon-refresh icon"></div>
+                <div class="icon-refresh icon" @click="refresh"></div>
             </div>
         </div>
         <div class="main-body__table" id="EmployeeTable">
@@ -55,11 +51,11 @@
                         <td>Chưa có</td>
                         <td>Chưa có</td>
                         <td>Chưa có</td>
-                        <td class="task">
+                        <td class="task" @dblclick.stop="handle">
                             <div>
                                 <button class="table-btn__edit" @click="handleEdit(emp.EmployeeId)">Sửa</button>
                                 <button class="table-btn__arrow">
-                                    <div class="btn-arrow__icon"></div>
+                                    <div class="btn-arrow__icon" @click="handleOpenTask(emp.EmployeeId, emp.EmployeeCode)"></div>
                                 </button>
                             </div>
                         </td>
@@ -88,22 +84,34 @@
         </div>
     </div>
 </div>
+<div class="task-combobox" v-show="showOption">
+    <div class="task-btn__clone">Nhân bản</div>
+    <div class="task-btn__delete" @click="handleDelete">Xóa</div>
+    <div class="task-btn__stop">Ngừng sử dụng</div>
+</div>
 
-<FormEmployee :showForm="isShowForm" @handleCloseForm="handleCloseForm" @resetTable="resetTable"/>
+<FormEmployee @handleCloseForm="handleCloseForm" @resetTable="resetTable" />
 <div id="over" v-show="showOver"></div>
 <div class="loader" v-show="showLoader"></div>
+<PopupMessage :showPopup="popup" />
+<ToastMessage :showToast="toast" />
 </template>
 
 <script>
 import BaseButton from '../base/Button/BaseButton.vue';
 import BaseInput from "../base/Input/BaseInput.vue";
 import FormEmployee from '../view/FormEmployee.vue';
+import PopupMessage from '../view/PopupMessage.vue';
+import ToastMessage from '../view/ToastMessage.vue';
 import {
     loadEmployees
 } from '@/utils/loadEmployees';
 import {
     getEmployee
 } from '../utils/getEmployee';
+import {
+    deleteEmployee
+} from '../utils/saveEmployee';
 
 export default {
     name: "TheContentMain",
@@ -114,17 +122,24 @@ export default {
         return {
             employees: [],
             isShowForm: false,
-            showOver: true,
-            showLoader: true,
+            showOver: false,
+            showLoader: false,
 
             totalEmployee: 120,
             dataForm: [],
+            showOption: false,
+            employeeId: "",
+            employeeCode: "",
+            popup: 0,
+            toast: 0,
         };
     },
     components: {
         BaseButton,
         BaseInput,
-        FormEmployee
+        FormEmployee,
+        PopupMessage,
+        ToastMessage
     },
     methods: {
         /**
@@ -136,11 +151,15 @@ export default {
             setTimeout(() => {
                 this.showOver = false;
                 this.showLoader = false;
-            }, 2000);
+            }, 1000);
+            // Thực hiện nếu lấy dữ liệu thành công
             if (list != 404) {
                 this.employees = list;
+                this.totalEmployee = list.length;
                 this.showLoader = false;
                 this.showOver = false;
+            } else {
+                alert("Không thể lấy dữ liệu")
             }
         },
         /**
@@ -149,28 +168,29 @@ export default {
          */
         handleOpenForm() {
             this.showOver = true;
-            this.isShowForm = true;
+
+            this.emitter.emit("openAddForm");
         },
         /**
          * Đóng Form Thông Tin Nhân Viên
          * Created by VMHIEU 04/08/2022
          */
         handleCloseForm() {
-            this.isShowForm = false;
             this.showOver = false;
+
+            this.emitter.emit("closeForm");
         },
         /**
          * Mở Form Edit nhân viên
          * Created by VMHIEU 07/08/2022
          */
         async handleEdit(id) {
-            this.isShowForm = true;
             this.showOver = true;
-            
+
             let dataForm = await getEmployee(id);
             this.emitter.emit("openEditForm", dataForm);
         },
-        resetTable(){
+        resetTable() {
             this.loadEmployees();
         },
         /**
@@ -190,15 +210,83 @@ export default {
             } catch (error) {
                 console.log(error);
             }
-        }
+        },
+        /**
+         * Refresh lại dữ liệu
+         * CreatedBy VMHieu 08/08/2022
+         */
+        refresh() {
+            this.showOver = true;
+            this.showLoader = true;
+            this.loadEmployees();
+        },
+        /**
+         * Mở bảng option
+         * CreatedBy VMHieu 08/08/2022
+         */
+        handleOpenTask(id, code) {
+            // Toggle form option
+            this.showOption = !this.showOption;
 
+            // Lưu id của nhân viên được chọn
+            this.employeeId = id;
+            this.employeeCode = code;
+
+            let taskOption = document.querySelector(".task-combobox");
+
+            taskOption.style.left = (event.clientX + 10) + 'px';
+            taskOption.style.top = (event.clientY + 12) + 'px';
+        },
+        /**
+         * Click vào nút xóa
+         * CreatedBy VMHieu 08/08/2022
+         */
+        async handleDelete() {
+            this.emitter.emit("openPopupDelete", this.employeeCode);
+            this.popup = 1;
+            this.showOver = true;
+            this.showOption = false;
+        }
     },
     created() {
         // Thực hiện lấy dữ liệu Employee
         this.loadEmployees();
+
+        // Hiệu ứng tối màn hình và loader
+        this.showOver = true;
+        this.showLoader = true;
     },
-    mouted() {
-        
+    mounted() {
+        setTimeout(() => {
+            /**
+             * Bắt sự kiện nhấn nút trong popup
+             * CreatedBy VMHieu 10/08/2022
+             */
+            this.emitter.on("closePopup",async (val) => {
+                if (val == 3) {
+                    let status = await deleteEmployee(this.employeeId);
+
+                    if(status == 200) {
+                        // Bật hiệu ứng tối màn hình và loader
+                        this.showOver = true;
+                        this.showLoader = true;
+                        // Load lại table
+                        this.loadEmployees();
+                        this.showOption = false;
+                        // Hiện toast trong 2s
+                        this.toast = 1;
+                        setTimeout(() => {
+                            this.toast = 0;
+                        }, 2000);
+                    } else {
+                        console.log("Fail");
+                    }
+                } else {
+                    this.showOver = false;
+                }
+                this.popup = 0;
+            })
+        }, 1);
     }
 }
 </script>
