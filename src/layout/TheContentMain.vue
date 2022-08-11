@@ -84,17 +84,26 @@
         </div>
     </div>
 </div>
-<div class="task-combobox" v-show="showOption">
+<div class="task-combobox" ref="taskCombobox" v-show="showOption">
     <div class="task-btn__clone">Nhân bản</div>
     <div class="task-btn__delete" @click="handleDelete">Xóa</div>
     <div class="task-btn__stop">Ngừng sử dụng</div>
 </div>
 
-<FormEmployee @handleCloseForm="handleCloseForm" @resetTable="resetTable" />
+<transition name="toast">
+    <ToastMessage :showToast="toast" />
+</transition>
+<transition name="form">
+    <FormEmployee @handleCloseForm="handleCloseForm" @resetTable="resetTable" @resetTableSave="resetTableSave" />
+</transition>
+
 <div id="over" v-show="showOver"></div>
+
+<transition name="popup">
+    <PopupMessage :showPopup="popup" />
+</transition>
+
 <div class="loader" v-show="showLoader"></div>
-<PopupMessage :showPopup="popup" />
-<ToastMessage :showToast="toast" />
 </template>
 
 <script>
@@ -148,18 +157,20 @@ export default {
          */
         async loadEmployees() {
             let list = await loadEmployees();
-            setTimeout(() => {
-                this.showOver = false;
-                this.showLoader = false;
-            }, 1000);
+            // setTimeout(() => {
+            //     this.showOver = false;
+            //     this.showLoader = false;
+            // }, 1000);
             // Thực hiện nếu lấy dữ liệu thành công
             if (list != 404) {
                 this.employees = list;
                 this.totalEmployee = list.length;
                 this.showLoader = false;
                 this.showOver = false;
+
+                this.openToast(3);
             } else {
-                alert("Không thể lấy dữ liệu")
+                this.openToast(4);
             }
         },
         /**
@@ -190,8 +201,14 @@ export default {
             let dataForm = await getEmployee(id);
             this.emitter.emit("openEditForm", dataForm);
         },
-        resetTable() {
-            this.loadEmployees();
+        /**
+         * Load lại table khi ấn vào nút cất 
+         */
+        async resetTable() {
+            let list = await loadEmployees();
+
+            this.employees = list;
+
         },
         /**
          * Format ngày tháng
@@ -232,7 +249,7 @@ export default {
             this.employeeId = id;
             this.employeeCode = code;
 
-            let taskOption = document.querySelector(".task-combobox");
+            let taskOption = this.$refs.taskCombobox;
 
             taskOption.style.left = (event.clientX + 10) + 'px';
             taskOption.style.top = (event.clientY + 12) + 'px';
@@ -246,6 +263,16 @@ export default {
             this.popup = 1;
             this.showOver = true;
             this.showOption = false;
+        },
+        /**
+         * Mở toastMessage
+         * CreatedBy VMHieu 11/08/2022
+         */
+        openToast(id) {
+            this.toast = id;
+            setTimeout(() => {
+                this.toast = 0;
+            }, 1000);
         }
     },
     created() {
@@ -262,29 +289,54 @@ export default {
              * Bắt sự kiện nhấn nút trong popup
              * CreatedBy VMHieu 10/08/2022
              */
-            this.emitter.on("closePopup",async (val) => {
-                if (val == 3) {
-                    let status = await deleteEmployee(this.employeeId);
+            this.emitter.on("closePopup", async (val) => {
+                    if (val == 3) {
+                        let status = await deleteEmployee(this.employeeId);
 
-                    if(status == 200) {
-                        // Bật hiệu ứng tối màn hình và loader
-                        this.showOver = true;
-                        this.showLoader = true;
-                        // Load lại table
-                        this.loadEmployees();
-                        this.showOption = false;
-                        // Hiện toast trong 2s
-                        this.toast = 1;
-                        setTimeout(() => {
-                            this.toast = 0;
-                        }, 2000);
-                    } else {
-                        console.log("Fail");
+                        if (status == 200) {
+                            // Bật hiệu ứng tối màn hình và loader
+                            this.showOver = true;
+                            this.showLoader = true;
+                            // Load lại table
+                            this.loadEmployees();
+                            this.showOption = false;
+                            // Hiện toast trong 2s
+                            this.openToast(2);
+                        } else {
+                            console.log("Fail");
+                        }
+                    } else if (val == 1) {
+                        this.showOver = false;
                     }
-                } else {
-                    this.showOver = false;
-                }
-                this.popup = 0;
+                    this.popup = 0;
+                }),
+            /**
+             * Bắt sự kiện ấn nút close toastMessage
+             * CreatedBy VMHieu 11/08/2022
+             */
+            this.emitter.on("closeToastMessage", () => {
+                this.toast = 0;
+            }),
+            /**
+             * Bắt sự kiện thêm nhân viên thành công
+             * CreatedBy VMHieu 11/08/2022
+             */
+            this.emitter.on("addSuccess", () => {
+                this.openToast(1);
+            }),
+            /**
+             * Bắt sự kiện sửa nhân viên thành công
+             * CreatedBy VMHieu 11/08/2022
+             */
+            this.emitter.on("editSuccess", () => {
+                this.openToast(6);
+            }),
+            /**
+             * Bắt sự kiện thêm/sửa nhân viên thất bại
+             * CreatedBy VMHieu 11/08/2022
+             */
+            this.emitter.on("addFail", () => {
+                this.openToast(5);
             })
         }, 1);
     }
@@ -414,5 +466,50 @@ export default {
     box-sizing: border-box;
     height: 30px;
     padding: 0;
+}
+
+.form-enter-from,
+.toast-enter-from,
+.over-enter-from,
+.popup-enter-from {
+    opacity: 0;
+}
+
+.form-leave-from,
+.toast-leave-from,
+.over-leave-from,
+.popup-leave-from {
+    opacity: 1;
+}
+
+.form-enter-to,
+.toast-enter-to,
+.over-enter-to,
+.popup-enter-to {
+    opacity: 1;
+}
+
+.form-leave-to,
+.toast-leave-to,
+.over-leave-to,
+.popup-leave-to {
+    opacity: 0;
+}
+
+.form-enter-active,
+.over-enter-active,
+.popup-enter-active {
+    transition: all .2s ease;
+}
+
+.form-leave-active,
+.over-leave-active,
+.popup-leave-active {
+    transition: all 0s ease;
+}
+
+.toast-enter-active,
+.toast-leave-active {
+    transition: all .8s ease;
 }
 </style>

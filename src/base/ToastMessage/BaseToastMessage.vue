@@ -5,7 +5,7 @@
         <div class="toast-content">
             <slot></slot>
         </div>
-        <div class="toast-close"></div>
+        <div class="toast-close" @click="closeToastMessage"></div>
     </div>
 </div>
 </template>
@@ -17,6 +17,14 @@ export default {
         id: {
             type: String,
             default: ""
+        }
+    },
+    methods: {
+        /**
+         * Sự kiện tắt toast message khi ấn nút close
+         */
+        closeToastMessage() {
+            this.emitter.emit("closeToastMessage");
         }
     }
 }

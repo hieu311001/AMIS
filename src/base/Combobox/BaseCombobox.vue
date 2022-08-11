@@ -15,7 +15,7 @@
     >
       <!-- <i class="fa-solid fa-chevron-down"></i> -->
       <img
-        :src="require('../../assets/icon/down.png')"
+        :src="require('@/assets/icon/down.png')"
         alt=""
         srcset=""
         width="24"

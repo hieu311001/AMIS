@@ -41,8 +41,7 @@
                                             <div class="icon icon-department__arrow"></div>
                                         </div>
                                     </BaseInput> -->
-                                    <BaseCombobox id="departmentName" class="combobox" Required="true"
-                                        value="" url="https://cukcuk.manhnv.net/api/v1/Departments" propValue="DepartmentId" propText="DepartmentName"/>
+                                    <BaseCombobox id="departmentName" class="combobox" Required="true" value="" url="https://cukcuk.manhnv.net/api/v1/Departments" propValue="DepartmentId" propText="DepartmentName" />
                                 </div>
                             </div>
                             <div class="popup-left__3">
@@ -66,15 +65,15 @@
                                     <label for="" class="m-label">Giới tính</label>
                                     <div class="popup-input popup-input__gender">
                                         <div>
-                                            <input type="radio" value="1" name="gender">
+                                            <input type="radio" value="1" v-model="gender">
                                             <label for="">Nam</label>
                                         </div>
                                         <div>
-                                            <input type="radio" value="0" name="gender">
+                                            <input type="radio" value="0" v-model="gender">
                                             <label for="">Nữ</label>
                                         </div>
                                         <div>
-                                            <input type="radio" value="2" name="gender">
+                                            <input type="radio" value="2" v-model="gender">
                                             <label for="">Khác</label>
                                         </div>
                                     </div>
@@ -145,15 +144,15 @@
                         <div class="popup-footer__btn">
                             <div class="popup-btn__left">
                                 <div class="popup-btn__cancel">
-                                    <BaseButton text="Hủy" class="ms-button w-600" @click="closeForm"/>   
+                                    <BaseButton text="Hủy" class="ms-button w-600" @click="closeForm" />
                                 </div>
                             </div>
                             <div class="popup-btn__right">
                                 <div class="popup-btn__store" style="padding: 0 0.75rem;">
-                                    <BaseButton text="Cất" class="ms-button w-600" @click="handleStore"/>                                     
+                                    <BaseButton text="Cất" class="ms-button w-600" @click="handleStore" />
                                 </div>
                                 <div class="popup-btn__save">
-                                    <BaseButton text="Cất và thêm" class="m-button w-600" @click="handleSave"/>   
+                                    <BaseButton text="Cất và thêm" class="m-button w-600" @click="handleSave" />
                                 </div>
                             </div>
                         </div>
@@ -162,6 +161,10 @@
             </div>
         </div>
     </div>
+    <transition name="fade-popup">
+        <PopupMessage :showPopup="popup" />
+    </transition>
+    <div id="overForm" v-if="showOverForm"></div>
 </div>
 </template>
 
@@ -169,8 +172,10 @@
 import BaseInput from '@/base/Input/BaseInput.vue';
 import BaseCombobox from '@/base/Combobox/BaseCombobox.vue';
 import BaseButton from '@/base/Button/BaseButton.vue';
+import PopupMessage from './PopupMessage.vue';
 import {
-    addEmployee, editEmployee
+    addEmployee,
+    editEmployee
 } from '../utils/saveEmployee';
 import {
     getDepartment
@@ -187,6 +192,7 @@ export default {
         BaseInput,
         BaseCombobox,
         BaseButton,
+        PopupMessage,
     },
     data() {
         return {
@@ -209,6 +215,10 @@ export default {
             CurrentFormMode: 1,
             showForm: false,
             employeeId: "",
+            popup: 0,
+            showOverForm: false,
+            gender: "",
+            toast: 0,
         }
     },
     methods: {
@@ -220,7 +230,6 @@ export default {
             this.$emit("handleCloseForm");
             this.emitter.emit("closeForm");
             this.resetForm();
-            console.log(this.$refs.form);
         },
         /**
          * Reset form khi add xong
@@ -247,7 +256,7 @@ export default {
          */
         validateForm() {
             let me = this.$el,
-                isValid = true, 
+                isValid = true,
                 error = [];
 
             // Validate trường Required
@@ -259,17 +268,17 @@ export default {
 
                     val.classList.add("m-input__error");
 
-                    if(val.id == this.required.employeeCode || required.id == this.required.employeeCode){
+                    if (val.id == this.required.employeeCode || required.id == this.required.employeeCode) {
                         val.setAttribute("title", this.error.code);
                         error.push(this.error.code);
-                    } else if (val.id == this.required.fullName || required.id == this.required.fullName){
+                    } else if (val.id == this.required.fullName || required.id == this.required.fullName) {
                         val.setAttribute("title", this.error.name);
                         error.push(this.error.name);
-                    } else if (val.id == this.required.departmentName || required.id == this.required.departmentName){
+                    } else if (val.id == this.required.departmentName || required.id == this.required.departmentName) {
                         val.setAttribute("title", this.error.department);
                         error.push(this.error.department)
                     }
-                    
+
                 } else {
                     val.setAttribute("title", "");
                     val.classList.remove("m-input__error");
@@ -311,7 +320,12 @@ export default {
                 }
             })
 
-            this.emitter.emit("openPopupError", error);
+            if (error.length > 0) {
+                this.popup = 3;
+                this.showOverForm = true;
+                this.emitter.emit("openPopupError", error);
+            }
+
             return isValid;
         },
         /**
@@ -321,25 +335,24 @@ export default {
         getDataForm() {
             let me = this.$el;
 
+            let dateOfBirth = me.querySelector("#dateOfBirth").value,
+                identityDate = me.querySelector("#identityDate").value;
+
+            console.log(dateOfBirth)
+
             let employee = {
                 "EmployeeCode": me.querySelector("#employeeCode").value,
                 "FullName": me.querySelector("#fullName").value,
                 "DepartmentId": me.querySelector("#departmentName").value,
                 "PositionID": me.querySelector("#positionName").value,
-                "DateOfBirth": me.querySelector("#dateOfBirth").value,
+                "DateOfBirth": new Date(dateOfBirth),
                 "IdentityNumber": me.querySelector("#identityNumber").value,
-                "IdentityDate": me.querySelector("#identityDate").value,
+                "IdentityDate": new Date(identityDate),
                 "IdentityPlace": me.querySelector("#identityPlace").value,
                 "Address": me.querySelector("#address").value,
                 "PhoneNumber": me.querySelector("#phoneNumber").value,
-                "Email": me.querySelector("#email").value
-            }
-
-            var checkbox = document.getElementsByName("gender");
-            for (var i = 0; i < checkbox.length; i++) {
-                if (checkbox[i].checked === true) {
-                    employee["Gender"] = checkbox[i].value
-                }
+                "Email": me.querySelector("#email").value,
+                "Gender": this.gender,
             }
 
             console.log(employee);
@@ -357,21 +370,27 @@ export default {
 
             if (isValid) {
                 employee = this.getDataForm();
-                if (this.CurrentFormMode == this.FormMode.Add){
+                if (this.CurrentFormMode == this.FormMode.Add) {
                     status = await addEmployee(employee);
 
                     if (status == 201) {
-                    this.resetForm();
-                    this.closeForm();
-                    this.$emit("resetTable");
+                        this.resetForm();
+                        this.closeForm();
+                        this.$emit("resetTable");
+                        this.emitter.emit("addSuccess");
+                    } else {
+                        this.emitter.emit("addFail");
                     }
-                } else if ( this.CurrentFormMode == this.FormMode.Edit) {
+                } else if (this.CurrentFormMode == this.FormMode.Edit) {
                     status = await editEmployee(employee, this.employeeId);
 
                     if (status == 200) {
-                    this.resetForm();
-                    this.closeForm();
-                    this.$emit("resetTable");
+                        this.resetForm();
+                        this.closeForm();
+                        this.$emit("resetTable");
+                        this.emitter.emit("editSuccess");
+                    } else {
+                        this.emitter.emit("addFail");
                     }
                 }
             }
@@ -387,25 +406,34 @@ export default {
 
             if (isValid) {
                 employee = this.getDataForm();
-                if (this.CurrentFormMode == this.FormMode.Add){
+                if (this.CurrentFormMode == this.FormMode.Add) {
                     status = await addEmployee(employee);
 
                     if (status == 201) {
-                    this.resetForm();
-                    this.$emit("resetTable");
+                        this.resetForm();
+                        this.$emit("resetTable");
+                        this.emitter.emit("addSuccess");
+                    } else {
+                        this.emitter.emit("addFail");
                     }
-                } else if ( this.CurrentFormMode == this.FormMode.Edit) {
+                } else if (this.CurrentFormMode == this.FormMode.Edit) {
                     status = await editEmployee(employee, this.employeeId);
 
                     if (status == 200) {
-                    this.resetForm();
-                    this.$emit("resetTable");
+                        this.resetForm();
+                        this.$emit("resetTable");
+                        this.emitter.emit("editSuccess");
+                    } else {
+                        this.emitter.emit("addFail");
                     }
                 }
-
-                
             }
         },
+        /**
+         * Format date
+         * @param {dữ liệu date nhận được} date 
+         * CreatedBy VMHieu 06/08/2022
+         */
         formatDate(date) {
             try {
                 if (date) {
@@ -419,6 +447,16 @@ export default {
             } catch (error) {
                 console.log(error);
             }
+        },
+        /**
+         * Mở toastMessage
+         * CreatedBy VMHieu 11/08/2022
+         */
+        openToast(id) {
+            this.toast = id;
+            setTimeout(() => {
+                this.toast = 0;
+            }, 1000);
         }
     },
     mounted() {
@@ -465,18 +503,13 @@ export default {
                 me.querySelector("#phoneNumber").value = employeeData.PhoneNumber;
                 me.querySelector("#email").value = employeeData.Email;
 
-                me.querySelectorAll("[name = 'gender']").forEach((gender) => {
-                    if (gender.value == employeeData.Gender) {
-                        gender.checked = true;
-                    } else {
-                        gender.checked = false;
-                    }
-                })
+                this.gender = employeeData.Gender;
 
                 if (employeeData.DepartmentId) {
                     let department = await getDepartment(employeeData.DepartmentId);
 
                     me.querySelector("#departmentName input").value = department.DepartmentName;
+                    me.querySelector("#departmentName").value = employeeData.DepartmentId;
                 }
 
                 // if (employeeData.PositionId) {
@@ -493,14 +526,25 @@ export default {
                 this.showForm = false;
             })
             /**
-             * 
+             * Lắng nghe sự kiện mở form để binding ô đơn vị
+             * CreatBy VMHieu 07/08/2022
              */
             this.emitter.on("getValue", val => {
-                let me = this.$el;
+                    let me = this.$el;
 
-                me.querySelector("#departmentName").value = val[0];
-            })
+                    me.querySelector("#departmentName").value = val[0];
+                }),
+                /**
+                 * Lắng nghe sự kiện từ popup
+                 */
+                this.emitter.on("cancelPopup", () => {
+                    this.popup = 0;
+                    this.showOverForm = false;
+                })
         }, 1);
+    },
+    updated() {
+        console.log(this.gender)
     }
 }
 </script>
@@ -517,7 +561,7 @@ export default {
     min-width: 900px;
     resize: both;
     border-radius: 4px;
-    transition: all .2s ;
+    transition: all 1s;
 }
 
 .popup-content,
@@ -691,7 +735,14 @@ export default {
     position: relative;
 }
 
+input::-webkit-calendar-picker-indicator {
+    z-index: 10;
+    font-size: 30px;
+    opacity: 0;
+}
+
 .icon-department {
+    pointer-events: none;
     position: absolute;
     width: 32px;
     height: 100%;
@@ -703,5 +754,18 @@ export default {
     justify-content: center;
     box-sizing: border-box;
     outline: none;
+}
+
+.fade-popup-enter-active,
+.fade-popup-leave-active {
+    transition: opacity 1s;
+}
+
+.fade-popup-enter-to,
+.fade-popup-leave-to
+
+/* .fade-leave-active below version 2.1.8 */
+    {
+    opacity: 0;
 }
 </style>

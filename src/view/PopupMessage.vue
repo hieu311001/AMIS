@@ -17,7 +17,7 @@
 <BasePopup iconId="iconError" v-if="showPopup == 3">
     <template v-slot:slotText>{{ msg }}</template>
     <div class="btn btn-error">
-        <BaseButton text="Đồng Ý" class="m-button w-600"  @click="handleClose"/>
+        <BaseButton text="Đồng Ý" class="m-button w-600"  @click="handleCancel"/>
     </div>
 </BasePopup>
 
@@ -59,12 +59,15 @@ export default {
         }
     },
     methods: {
+        // Phát sự kiện ấn nút close
         handleClose() {
             this.emitter.emit("closePopup", this.PopupMode.Close);
         }, 
+        // Phát sự kiện ấn nút cancel
         handleCancel(){
             this.emitter.emit("cancelPopup", this.PopupMode.Cancel)
         },
+        // Phát sự kiện ấn nut save
         handleSave() {
             this.emitter.emit("closePopup", this.PopupMode.Save);
         }
@@ -77,7 +80,7 @@ export default {
             })
             // Bắt sự kiện ấn nút validate form 
             this.emitter.on("openPopupError", (data) => {
-                console.log(data);
+                this.msg = data[0];
             })
         }, 1);
     }

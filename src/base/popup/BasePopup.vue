@@ -40,7 +40,7 @@ export default {
     width: 444px;
     border-radius: 4px;
     background-color: #fff;
-    z-index: 999;
+    z-index: 10001;
 }
 
 .popup-container {

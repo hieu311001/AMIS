@@ -138,3 +138,7 @@
 #iconSuccess{
     background: url(../assets/Sprites.5c668001.png) no-repeat -96px -962px;
 }
+
+#iconFail{
+    background: url(../assets/Sprites.5c668001.png) no-repeat -32px -962px;
+}
