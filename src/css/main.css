@@ -89,6 +89,10 @@ body {
     animation: spin 2s linear infinite;
 }
 
+a{
+    text-decoration: none;
+}
+
 /* Safari */
 @-webkit-keyframes spin {
     0% {

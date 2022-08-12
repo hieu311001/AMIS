@@ -13,14 +13,15 @@
       @keydown="selecItemUpDown"
       tabindex="-1"
     >
-      <!-- <i class="fa-solid fa-chevron-down"></i> -->
+      <!-- <i class="fa-solid fa-chevron-down"></i>
       <img
         :src="require('@/assets/icon/down.png')"
         alt=""
         srcset=""
         width="24"
         height="24"
-      />
+      /> -->
+      <div class="icon icon-department__arrow"></div>
     </button>
     <div
       v-if="isShowListData"
@@ -339,7 +340,6 @@ select {
   min-width: unset !important;
   outline: none;
   box-sizing: border-box;
-  opacity: 0.5;
 }
 
 .combobox__button:hover,

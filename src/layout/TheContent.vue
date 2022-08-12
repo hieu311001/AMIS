@@ -1,13 +1,13 @@
 <template>
 <div class="content-area">
-    <TheContentTop />
-    <TheContentMain />
+    <TheHeader />
+    <router-view></router-view>
 </div>
 </template>
 
 <script>
-import TheContentMain from './TheContentMain.vue';
-import TheContentTop from './TheContentTop.vue';
+// import EmployeePage from './Employee/EmployeePage.vue';
+import TheHeader from './TheHeader.vue';
 
 export default {
     name: 'ContentArea',
@@ -15,8 +15,8 @@ export default {
 
     },
     components: {
-        TheContentMain,
-        TheContentTop
+        // EmployeePage,
+        TheHeader,
     }
 }
 </script>

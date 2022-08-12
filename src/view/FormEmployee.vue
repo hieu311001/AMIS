@@ -55,7 +55,7 @@
                             <div class="popup-right__1">
                                 <div class="popup-birthday">
                                     <label for="" class="m-label">Ngày sinh</label>
-                                    <BaseInput Class="popup-input popup-input__icon" type="date" inputClass="m-input m-input-date" placeholder="DD/MM/YYYY" id="dateOfBirth" DataType="Date">
+                                    <BaseInput Class="popup-input popup-input__icon" type="text" inputClass="m-input m-input-date" placeholder="DD/MM/YYYY" id="dateOfBirth" DataType="Date">
                                         <div class="icon-department">
                                             <div class="icon icon-date"></div>
                                         </div>

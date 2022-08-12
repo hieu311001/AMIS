@@ -107,20 +107,20 @@
 </template>
 
 <script>
-import BaseButton from '../base/Button/BaseButton.vue';
-import BaseInput from "../base/Input/BaseInput.vue";
-import FormEmployee from '../view/FormEmployee.vue';
-import PopupMessage from '../view/PopupMessage.vue';
-import ToastMessage from '../view/ToastMessage.vue';
+import BaseButton from '@/base/Button/BaseButton.vue';
+import BaseInput from "@/base/Input/BaseInput.vue";
+import FormEmployee from '@/view/FormEmployee.vue';
+import PopupMessage from '@/view/PopupMessage.vue';
+import ToastMessage from '@/view/ToastMessage.vue';
 import {
     loadEmployees
 } from '@/utils/loadEmployees';
 import {
     getEmployee
-} from '../utils/getEmployee';
+} from '../../utils/getEmployee';
 import {
     deleteEmployee
-} from '../utils/saveEmployee';
+} from '../../utils/saveEmployee';
 
 export default {
     name: "TheContentMain",
@@ -269,10 +269,12 @@ export default {
          * CreatedBy VMHieu 11/08/2022
          */
         openToast(id) {
-            this.toast = id;
+            setTimeout(() => {
+                this.toast = id;
+            }, 500);
             setTimeout(() => {
                 this.toast = 0;
-            }, 1000);
+            }, 2000);
         }
     },
     created() {
