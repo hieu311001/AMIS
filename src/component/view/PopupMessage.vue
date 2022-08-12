@@ -34,8 +34,8 @@
 </template>
 
 <script>
-import BasePopup from '@/base/popup/BasePopup.vue';
-import BaseButton from '@/base/Button/BaseButton.vue';
+import BasePopup from '@/component/base/popup/BasePopup.vue';
+import BaseButton from '@/component/base/Button/BaseButton.vue';
 export default {
     name: 'PopupMessage',
     components: {

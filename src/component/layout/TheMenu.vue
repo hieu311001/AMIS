@@ -147,7 +147,7 @@ export default {
 }
 
 .logo {
-    background: url('../assets/Sprites.5c668001.png') no-repeat -424px -86px;
+    background: url('@/assets/Sprites.5c668001.png') no-repeat -424px -86px;
     margin-right: 10px;
 }
 
@@ -233,7 +233,7 @@ export default {
 }
 
 .menu-bars__icon {
-    background: url(../assets/Sprites.5c668001.png) no-repeat -312px -32px;
+    background: url(@/assets/Sprites.5c668001.png) no-repeat -312px -32px;
     width: 24px;
     height: 24px;
     min-height: 24px;

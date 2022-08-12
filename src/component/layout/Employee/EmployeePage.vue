@@ -107,20 +107,20 @@
 </template>
 
 <script>
-import BaseButton from '@/base/Button/BaseButton.vue';
-import BaseInput from "@/base/Input/BaseInput.vue";
-import FormEmployee from '@/view/FormEmployee.vue';
-import PopupMessage from '@/view/PopupMessage.vue';
-import ToastMessage from '@/view/ToastMessage.vue';
+import BaseButton from '@/component/base/Button/BaseButton.vue';
+import BaseInput from "@/component/base/Input/BaseInput.vue";
+import FormEmployee from '@/component/view/FormEmployee.vue';
+import PopupMessage from '@/component/view/PopupMessage.vue';
+import ToastMessage from '@/component/view/ToastMessage.vue';
 import {
     loadEmployees
 } from '@/utils/loadEmployees';
 import {
     getEmployee
-} from '../../utils/getEmployee';
+} from '@/utils/getEmployee';
 import {
     deleteEmployee
-} from '../../utils/saveEmployee';
+} from '@/utils/saveEmployee';
 
 export default {
     name: "TheContentMain",

@@ -78,7 +78,7 @@ export default {
 }
 
 .top-left__logo {
-    background: url('../assets/Sprites.5c668001.png') no-repeat -843px -30px;
+    background: url('@/assets/Sprites.5c668001.png') no-repeat -843px -30px;
     margin: 0 10px;
     cursor: pointer;
 }
@@ -112,7 +112,7 @@ export default {
 
 
 .combobox_arrow {
-    background: url('../assets/Sprites.5c668001.png') no-repeat -80px -360px;
+    background: url('@/assets/Sprites.5c668001.png') no-repeat -80px -360px;
     width: 14px;
     height: 14px;
     min-width: 14px;
@@ -208,7 +208,7 @@ export default {
 }
 
 .account-arrow{
-    background: url('../assets/Sprites.5c668001.png') no-repeat -1076px -32px;
+    background: url('@/assets/Sprites.5c668001.png') no-repeat -1076px -32px;
     width: 14px;
     height: 14px;
     cursor: pointer;

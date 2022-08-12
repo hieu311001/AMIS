@@ -6,8 +6,8 @@
 </template>
 
 <script>
-import TheContent from "./layout/TheContent.vue";
-import TheMenu from "./layout/TheMenu.vue";
+import TheContent from "@/component/layout/TheContent.vue";
+import TheMenu from "@/component/layout/TheMenu.vue";
 
 export default {
     name: "App",

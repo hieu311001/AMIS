@@ -169,17 +169,17 @@
 </template>
 
 <script>
-import BaseInput from '@/base/Input/BaseInput.vue';
-import BaseCombobox from '@/base/Combobox/BaseCombobox.vue';
-import BaseButton from '@/base/Button/BaseButton.vue';
+import BaseInput from '@/component/base/Input/BaseInput.vue';
+import BaseCombobox from '@/component/base/Combobox/BaseCombobox.vue';
+import BaseButton from '@/component/base/Button/BaseButton.vue';
 import PopupMessage from './PopupMessage.vue';
 import {
     addEmployee,
     editEmployee
-} from '../utils/saveEmployee';
+} from '@/utils/saveEmployee';
 import {
     getDepartment
-} from '../utils/getDepartment';
+} from '@/utils/getDepartment';
 // import {
 //     getPosition
 // } from '../utils/getPosition';

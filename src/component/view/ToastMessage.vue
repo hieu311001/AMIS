@@ -19,7 +19,7 @@
     </BaseToastMessage>
 </template>
 <script>
-import BaseToastMessage from '@/base/ToastMessage/BaseToastMessage.vue';
+import BaseToastMessage from '@/component/base/ToastMessage/BaseToastMessage.vue';
 
 export default {
     name: "ToastMessage",

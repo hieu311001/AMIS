@@ -70,7 +70,7 @@ export default {
 }
 
 .toast-close {
-    background: url(../../assets/Sprites.5c668001.png) no-repeat -1856px -146px;
+    background: url(@/assets/Sprites.5c668001.png) no-repeat -1856px -146px;
     width: 20px;
     height: 20px;
     cursor: pointer;

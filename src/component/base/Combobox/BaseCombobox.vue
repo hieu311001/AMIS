@@ -48,7 +48,7 @@
         <div class="combobox__item-icon">
           <img
             v-show="index == indexItemSelected"
-            :src="require('../../assets/icon/check.png')"
+            :src="require('@/assets/icon/check.png')"
             alt=""
             srcset=""
             width="14"
