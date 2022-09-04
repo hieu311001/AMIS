@@ -6,11 +6,11 @@
                 <div class="popup-title">
                     <div class="popup-title__title">Thông tin nhân viên</div>
                     <div class="popup-title__checkbox">
-                        <input type="checkbox">
+                        <input type="checkbox" class="input__checkbox">
                         <span class="checkbox-text">Là khách hàng</span>
                     </div>
                     <div class="popup-title__checkbox">
-                        <input type="checkbox">
+                        <input type="checkbox" class="input__checkbox">
                         <span class="checkbox-text">Là nhà cung cấp</span>
                     </div>
                 </div>
@@ -26,11 +26,11 @@
                             <div class="popup-left__1">
                                 <div class="popup-code" ref="popupCode">
                                     <label for="" class="m-label">Mã <span class="required">*</span></label>
-                                    <BaseInput Class="popup-input" inputClass="m-input" id="employeeCode" Required="true" />
+                                    <BaseInput Class="popup-input" inputClass="m-input" id="employeeCode" Required="true" type="text"/>
                                 </div>
                                 <div class="popup-name">
                                     <label for="" class="m-label">Tên <span class="required">*</span></label>
-                                    <BaseInput Class="popup-input" inputClass="m-input" id="fullName" Required="true" />
+                                    <BaseInput Class="popup-input" inputClass="m-input" id="employeeName" Required="true" type="text"/>
                                 </div>
                             </div>
                             <div class="popup-left__2">
@@ -41,13 +41,13 @@
                                             <div class="icon icon-department__arrow"></div>
                                         </div>
                                     </BaseInput> -->
-                                    <BaseCombobox id="departmentName" class="combobox" Required="true" value="" url="https://cukcuk.manhnv.net/api/v1/Departments" propValue="DepartmentId" propText="DepartmentName" />
+                                    <BaseCombobox id="departmentName" class="combobox" Required="true" value="" url="https://localhost:7050/api/v1/Departments" propValue="DepartmentID" propText="DepartmentName" />
                                 </div>
                             </div>
                             <div class="popup-left__3">
                                 <div class="popup-position">
                                     <label for="" class="m-label">Chức danh </label>
-                                    <BaseInput Class="popup-input" inputClass="m-input" id="positionName" />
+                                    <BaseInput Class="popup-input" inputClass="m-input" id="positionName" type="text"/>
                                 </div>
                             </div>
                         </div>
@@ -55,25 +55,29 @@
                             <div class="popup-right__1">
                                 <div class="popup-birthday">
                                     <label for="" class="m-label">Ngày sinh</label>
-                                    <BaseInput Class="popup-input popup-input__icon" type="text" inputClass="m-input m-input-date" placeholder="DD/MM/YYYY" id="dateOfBirth" DataType="Date">
-                                        <div class="icon-department">
-                                            <div class="icon icon-date"></div>
-                                        </div>
-                                    </BaseInput>
+                                    <el-date-picker
+                                        v-model="dateOfBirth"
+                                        type="date"
+                                        placeholder="DD/MM/YYYY"
+                                        :size="size"
+                                        format="DD/MM/YYYY"
+                                        class="element-date"
+                                        id="dateOfBirth"
+                                    />
                                 </div>
                                 <div class="popup-gender">
                                     <label for="" class="m-label">Giới tính</label>
                                     <div class="popup-input popup-input__gender">
                                         <div>
-                                            <input type="radio" value="1" v-model="gender">
+                                            <input type="radio" class="input__radio" value="1" v-model="gender" checked>
                                             <label for="">Nam</label>
                                         </div>
                                         <div>
-                                            <input type="radio" value="0" v-model="gender">
+                                            <input type="radio" class="input__radio" value="0" v-model="gender">
                                             <label for="">Nữ</label>
                                         </div>
                                         <div>
-                                            <input type="radio" value="2" v-model="gender">
+                                            <input type="radio" class="input__radio" value="2" v-model="gender">
                                             <label for="">Khác</label>
                                         </div>
                                     </div>
@@ -82,21 +86,25 @@
                             <div class="popup-right__2">
                                 <div class="popup-identityCode">
                                     <label for="" class="m-label">Số CMND</label>
-                                    <BaseInput Class="popup-input" inputClass="m-input" id="identityNumber" />
+                                    <BaseInput Class="popup-input" inputClass="m-input" id="identityNumber" type="text"/>
                                 </div>
                                 <div class="popup-identityDate">
                                     <label for="" class="m-label">Ngày cấp</label>
-                                    <BaseInput Class="popup-input popup-input__icon" type="date" inputClass="m-input m-input-date" placeholder="DD/MM/YYYY" id="identityDate" DataType="Date">
-                                        <div class="icon-department">
-                                            <div class="icon icon-date"></div>
-                                        </div>
-                                    </BaseInput>
+                                    <el-date-picker
+                                        v-model="identityDate"
+                                        type="date"
+                                        placeholder="DD/MM/YYYY"
+                                        :size="size"
+                                        format="DD/MM/YYYY"
+                                        class="element-date"
+                                        id="identityDate"
+                                    />
                                 </div>
                             </div>
                             <div class="popup-right__3">
                                 <div class="popup-identityIssue">
                                     <label for="" class="m-label">Nơi cấp</label>
-                                    <BaseInput Class="popup-input" inputClass="m-input" id="identityPlace" />
+                                    <BaseInput Class="popup-input" inputClass="m-input" id="identityPlace" type="text"/>
                                 </div>
                             </div>
                         </div>
@@ -104,37 +112,37 @@
                     <div class="popup-content__bottom">
                         <div class="popup-address">
                             <label for="" class="m-label">Địa chỉ</label>
-                            <BaseInput Class="popup-input" inputClass="m-input" id="address" />
+                            <BaseInput Class="popup-input" inputClass="m-input" id="address" type="text"/>
                         </div>
                         <div class="popup-bottom__flex">
                             <div class="popup-bottom__1">
                                 <div class="popup-phoneNumber">
                                     <label for="" class="m-label">ĐT di động</label>
-                                    <BaseInput Class="popup-input" inputClass="m-input" id="phoneNumber" />
+                                    <BaseInput Class="popup-input" inputClass="m-input" id="phoneNumber" type="text"/>
                                 </div>
                                 <div class="popup-bankNumber">
                                     <label for="" class="m-label">Tài khoản ngân hàng</label>
-                                    <BaseInput Class="popup-input" inputClass="m-input" />
+                                    <BaseInput Class="popup-input" inputClass="m-input" id="bankAccount" type="text"/>
                                 </div>
                             </div>
                             <div class="popup-bottom__2">
                                 <div class="popup-fixedNumber">
                                     <label for="" class="m-label">ĐT cố định</label>
-                                    <BaseInput Class="popup-input" inputClass="m-input" id="phoneNumber" />
+                                    <BaseInput Class="popup-input" inputClass="m-input" id="hotLine" type="text"/>
                                 </div>
                                 <div class="popup-bankName">
                                     <label for="" class="m-label">Tên ngân hàng</label>
-                                    <BaseInput Class="popup-input" inputClass="m-input" />
+                                    <BaseInput Class="popup-input" inputClass="m-input" id="bankName" type="text"/>
                                 </div>
                             </div>
                             <div class="popup-bottom__3">
                                 <div class="popup-email">
                                     <label for="" class="m-label">Email</label>
-                                    <BaseInput Class="popup-input" inputClass="m-input" id="email" DataType="Email" />
+                                    <BaseInput Class="popup-input" inputClass="m-input" id="email" DataType="Email" type="text"/>
                                 </div>
                                 <div class="popup-bankBranch">
                                     <label for="" class="m-label">Chi nhánh</label>
-                                    <BaseInput Class="popup-input" inputClass="m-input" />
+                                    <BaseInput Class="popup-input" inputClass="m-input" id="bankBranch" type="text"/>
                                 </div>
                             </div>
                         </div>
@@ -144,7 +152,7 @@
                         <div class="popup-footer__btn">
                             <div class="popup-btn__left">
                                 <div class="popup-btn__cancel">
-                                    <BaseButton text="Hủy" class="ms-button w-600" @click="closeForm" />
+                                    <BaseButton text="Hủy" class="ms-button w-600" @click="cancelForm" />
                                 </div>
                             </div>
                             <div class="popup-btn__right">
@@ -177,12 +185,15 @@ import {
     addEmployee,
     editEmployee
 } from '@/utils/saveEmployee';
+import { getEmployeeMaxCode } from '@/utils/loadEmployees';
 import {
     getDepartment
 } from '@/utils/getDepartment';
 // import {
 //     getPosition
 // } from '../utils/getPosition';
+
+
 
 export default {
     props: {
@@ -202,7 +213,7 @@ export default {
             },
             required: {
                 employeeCode: "employeeCode",
-                fullName: "fullName",
+                employeeName: "employeeName",
                 departmentName: "departmentName",
             },
             error: {
@@ -214,22 +225,49 @@ export default {
             },
             CurrentFormMode: 1,
             showForm: false,
-            employeeId: "",
+            employeeID: "",
             popup: 0,
             showOverForm: false,
             gender: "",
             toast: 0,
+            dateOfBirth: "",
+            identityDate: "",
         }
     },
     methods: {
+        /**
+         * Hủy Form 
+         * Created by VMHieu 04/08/2022
+         */
+        cancelForm() {
+            this.$emit("handleCloseForm");
+            this.emitter.emit("closeForm");
+            this.resetForm();
+        },
         /**
          * Đóng Form 
          * Created by VMHieu 04/08/2022
          */
         closeForm() {
-            this.$emit("handleCloseForm");
-            this.emitter.emit("closeForm");
-            this.resetForm();
+            // Xét sự thay đổi của form để in ra thông báo cất dữ liệu hay không
+            if (this.CurrentFormMode == this.FormMode.Add) {
+                this.$el.querySelectorAll("input").forEach((input) => {
+                    if ((input.value != "" && input.getAttribute("type") == "text")) {
+                        this.emitter.emit("openPopupWarning");
+                        this.popup = 4;
+                        this.showOverForm = true;
+                    } 
+                })
+                if (this.popup == 0) {
+                    this.$emit("handleCloseForm");
+                    this.emitter.emit("closeForm");
+                    this.resetForm();
+                }
+            } else if (this.CurrentFormMode == this.FormMode.Edit) {
+                this.$emit("handleCloseForm");
+                this.emitter.emit("closeForm");
+                this.resetForm();
+            }
         },
         /**
          * Reset form khi add xong
@@ -243,12 +281,19 @@ export default {
                 input.classList.remove("m-input__error");
             })
 
-            var checkbox = document.getElementsByName("gender");
+            var checkbox = me.querySelectorAll("input[type='radio']");
             for (var i = 0; i < checkbox.length; i++) {
                 if (checkbox[i].checked === true) {
                     checkbox[i].checked = false;
                 }
             }
+
+            this.showOverForm = false;
+            this.popup = 0;
+
+            this.dateOfBirth = "";
+            this.identityDate = "";
+            this.gender = "";
         },
         /**
          * Validate dữ liệu trước khi gửi lên server
@@ -271,7 +316,7 @@ export default {
                     if (val.id == this.required.employeeCode || required.id == this.required.employeeCode) {
                         val.setAttribute("title", this.error.code);
                         error.push(this.error.code);
-                    } else if (val.id == this.required.fullName || required.id == this.required.fullName) {
+                    } else if (val.id == this.required.employeeName || required.id == this.required.employeeName) {
                         val.setAttribute("title", this.error.name);
                         error.push(this.error.name);
                     } else if (val.id == this.required.departmentName || required.id == this.required.departmentName) {
@@ -285,12 +330,12 @@ export default {
                 }
             })
             // Validate trường Date
-            me.querySelectorAll('[DataType = "Date"]').forEach((date) => {
-                let val = date.querySelector("input"),
-                    today = new Date(),
-                    time = new Date(val.value);
+            me.querySelectorAll('.el-input').forEach((date) => {
+                let val = date.querySelector(".el-input__wrapper"),
+                    input = val.querySelector("input").value,
+                    today = new Date();
 
-                if (time > today && val.value) {
+                if (input != "" && new Date(this.formatDate(input)) > today) {
                     isValid = false;
 
                     val.classList.add("m-input__error");
@@ -338,24 +383,25 @@ export default {
             let dateOfBirth = me.querySelector("#dateOfBirth").value,
                 identityDate = me.querySelector("#identityDate").value;
 
-            console.log(dateOfBirth)
 
             let employee = {
                 "EmployeeCode": me.querySelector("#employeeCode").value,
-                "FullName": me.querySelector("#fullName").value,
-                "DepartmentId": me.querySelector("#departmentName").value,
-                "PositionID": me.querySelector("#positionName").value,
-                "DateOfBirth": new Date(dateOfBirth),
+                "EmployeeName": me.querySelector("#employeeName").value,
+                "DepartmentID": me.querySelector("#departmentName").value,
+                "PositionName": me.querySelector("#positionName").value,
+                "DateOfBirth": dateOfBirth != "" ? this.formatDate(dateOfBirth) : null,
                 "IdentityNumber": me.querySelector("#identityNumber").value,
-                "IdentityDate": new Date(identityDate),
+                "IdentityDate": identityDate != "" ? this.formatDate(identityDate) : null,
                 "IdentityPlace": me.querySelector("#identityPlace").value,
                 "Address": me.querySelector("#address").value,
                 "PhoneNumber": me.querySelector("#phoneNumber").value,
+                "HotLine": me.querySelector("#hotLine").value,
+                "BankAccount": me.querySelector("#bankAccount").value,
+                "BankName": me.querySelector("#bankName").value,
+                "BankBranch": me.querySelector("#bankBranch").value,
                 "Email": me.querySelector("#email").value,
-                "Gender": this.gender,
+                "Gender": parseInt(this.gender),
             }
-
-            console.log(employee);
 
             return employee;
         },
@@ -370,23 +416,24 @@ export default {
 
             if (isValid) {
                 employee = this.getDataForm();
+
                 if (this.CurrentFormMode == this.FormMode.Add) {
                     status = await addEmployee(employee);
 
                     if (status == 201) {
                         this.resetForm();
-                        this.closeForm();
+                        this.cancelForm();
                         this.$emit("resetTable");
                         this.emitter.emit("addSuccess");
                     } else {
                         this.emitter.emit("addFail");
                     }
                 } else if (this.CurrentFormMode == this.FormMode.Edit) {
-                    status = await editEmployee(employee, this.employeeId);
+                    status = await editEmployee(employee, this.employeeID);
 
                     if (status == 200) {
                         this.resetForm();
-                        this.closeForm();
+                        this.cancelForm();
                         this.$emit("resetTable");
                         this.emitter.emit("editSuccess");
                     } else {
@@ -417,7 +464,7 @@ export default {
                         this.emitter.emit("addFail");
                     }
                 } else if (this.CurrentFormMode == this.FormMode.Edit) {
-                    status = await editEmployee(employee, this.employeeId);
+                    status = await editEmployee(employee, this.employeeID);
 
                     if (status == 200) {
                         this.resetForm();
@@ -437,16 +484,18 @@ export default {
         formatDate(date) {
             try {
                 if (date) {
-                    date = new Date(date);
-                    let newDate = ("0" + date.getDate()).slice(-2),
-                        newMonth = ("0" + (date.getMonth() + 1)).slice(-2),
-                        newYear = date.getFullYear();
+                    let formatDate = date.split('/');
+                    let newDay = formatDate[0],
+                        newMonth = formatDate[1],
+                        newYear = formatDate[2];
 
-                    return `${newDate}/${newMonth}/${newYear}`;
+                    return `${newYear}-${newMonth}-${newDay}`;
                 }
             } catch (error) {
                 console.log(error);
             }
+
+            return "";
         },
         /**
          * Mở toastMessage
@@ -464,52 +513,65 @@ export default {
         this.CurrentFormMode = this.FormMode.Add;
 
         setTimeout(() => {
-            this.emitter.on("openAddForm", () => {
+            this.emitter.on("openAddForm",async () => {
                 this.showForm = true;
                 this.CurrentFormMode = this.FormMode.Add;
+            
+
+                // Call api lấy mã code lớn nhất binding vào ô Mã nhân viên
+                try {
+                    let code = await getEmployeeMaxCode();
+
+                    let employeeCode = this.$el.querySelector("#employeeCode");
+                    employeeCode.value = code['data'];
+                    employeeCode.focus();
+                } catch (ex) {
+                    console.log(ex);
+                }
             })
             /**
              * Bắt sự kiện ấn nút mở form sửa
              */
             this.emitter.on("openEditForm", async (employeeData) => {
-                let me = this.$el,
-                    dateOfBirth,
-                    identityDate;
+                let me = this.$el;
                 this.showForm = true;
+                
                 // Đổi sang mode sửa
                 this.CurrentFormMode = this.FormMode.Edit;
                 // Lưu id của nhân viên cần sửa
-                this.employeeId = employeeData.EmployeeId;
-
-                console.log(employeeData)
+                this.employeeID = employeeData.EmployeeID;
 
                 // Binding dữ liệu ra các ô input
                 if (employeeData.DateOfBirth) {
-                    dateOfBirth = this.formatDate(employeeData.DateOfBirth);
-                    me.querySelector("#dateOfBirth").value = dateOfBirth;
+                    // dateOfBirth = this.formatDate(employeeData.DateOfBirth);
+                    // this.dateOfBirth = dateOfBirth;
+                    this.dateOfBirth = employeeData.DateOfBirth;
                 }
 
                 if (employeeData.IdentityDate) {
-                    identityDate = this.formatDate(employeeData.IdentityDate);
-                    me.querySelector("#identityDate").value = identityDate;
+                    this.identityDate = employeeData.IdentityDate;
                 }
 
                 me.querySelector("#employeeCode").value = employeeData.EmployeeCode;
-                me.querySelector("#fullName").value = employeeData.FullName;
+                me.querySelector("#employeeName").value = employeeData.EmployeeName;
                 me.querySelector("#positionName").value = employeeData.PositionName;
                 me.querySelector("#identityNumber").value = employeeData.IdentityNumber;
                 me.querySelector("#identityPlace").value = employeeData.IdentityPlace;
                 me.querySelector("#address").value = employeeData.Address;
                 me.querySelector("#phoneNumber").value = employeeData.PhoneNumber;
                 me.querySelector("#email").value = employeeData.Email;
-
+                me.querySelector("#bankBranch").value = employeeData.BankBranch;
+                me.querySelector("#bankName").value = employeeData.BankName;
+                me.querySelector("#bankAccount").value = employeeData.BankAccount;
+                me.querySelector("#hotLine").value = employeeData.HotLine;
+                
                 this.gender = employeeData.Gender;
 
-                if (employeeData.DepartmentId) {
-                    let department = await getDepartment(employeeData.DepartmentId);
+                if (employeeData.DepartmentID) {
+                    let department = await getDepartment(employeeData.DepartmentID);
 
                     me.querySelector("#departmentName input").value = department.DepartmentName;
-                    me.querySelector("#departmentName").value = employeeData.DepartmentId;
+                    me.querySelector("#departmentName").value = employeeData.DepartmentID;
                 }
 
                 // if (employeeData.PositionId) {
@@ -533,18 +595,37 @@ export default {
                     let me = this.$el;
 
                     me.querySelector("#departmentName").value = val[0];
-                }),
-                /**
-                 * Lắng nghe sự kiện từ popup
-                 */
-                this.emitter.on("cancelPopup", () => {
-                    this.popup = 0;
-                    this.showOverForm = false;
-                })
+            }),
+            /**
+             * Lắng nghe sự kiện từ popup
+             * CreatBy VMHieu 07/08/2022
+             */
+            this.emitter.on("cancelPopup", () => {
+                this.popup = 0;
+                this.showOverForm = false;
+            })
+            /**
+             * Lắng nghe sự kiện từ popup
+             * CreatBy VMHieu 17/08/2022
+             */
+            this.emitter.on("closePopup", () => {
+                this.popup = 0;
+                this.showOverForm = false;
+                this.showForm = false;
+                this.resetForm();
+            })
+            /**
+             * Lắng nghe sự kiện từ popup
+             * CreatBy VMHieu 17/08/2022
+             */
+            this.emitter.on("storePopup", () => {
+                this.popup = 0;
+                this.handleStore();
+            })
         }, 1);
     },
     updated() {
-        console.log(this.gender)
+        
     }
 }
 </script>

@@ -254,6 +254,13 @@ export default {
         default:
           break;
       }
+      
+      // scroll combobox theo item đang được focus
+      if (this.indexItemFocus == 0){
+        this.$refs.combobox__data.scroll(0, 0);
+      } else {
+        this.$refs.combobox__data.scroll(0, this.indexItemFocus*32);
+      }
     },
   },
 
@@ -309,11 +316,12 @@ select {
   height: 32px;
   flex: 1;
   padding-right: 56px !important;
-  padding-left: 16px;
+  padding-left: 10px;
   border-radius: 2px;
   outline: none;
   border: 1px solid #bbbbbb;
   box-sizing: border-box;
+  z-index: 10;
 }
 
 .combobox__input:focus,
@@ -360,6 +368,8 @@ select {
   background-color: #fff;
   box-shadow: 0px 3px 6px #00000016;
   z-index: 999;
+  height: 128px;
+  overflow: auto;
 }
 
 .combobox__item {

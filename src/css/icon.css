@@ -119,6 +119,15 @@
     min-width: 16px;
 }
 
+.icon-paging__arrow{
+    background: url(../assets/Sprites.5c668001.png) no-repeat -560px -359px;
+    width: 16px; 
+    height: 16px;
+    min-height: 16px;
+    min-width: 16px;
+    transition: all 0.3s;
+}
+
 .icon-date{
     background: url(../assets/Sprites.5c668001.png) no-repeat -124px -308px;
 }
@@ -136,9 +145,17 @@
 }
 
 #iconSuccess{
-    background: url(../assets/Sprites.5c668001.png) no-repeat -96px -962px;
+    background: url(../assets/Sprites.5c668001.png) no-repeat -2069px -906px;
 }
 
 #iconFail{
     background: url(../assets/Sprites.5c668001.png) no-repeat -32px -962px;
+}
+
+.icon-tick{
+    background: url(../assets/Sprites.5c668001.png) no-repeat -1224px -360px;
+    width: 16px; 
+    height: 16px;
+    min-height: 16px;
+    min-width: 16px;
 }

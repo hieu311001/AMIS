@@ -113,3 +113,27 @@ a{
         transform: rotate(360deg);
     }
 }
+
+/* Css custom ô input sử dụng thư viện có sẵn element-ui */
+.el-input.el-input--prefix.el-input--suffix.el-date-editor.el-date-editor--date.element-date.el-tooltip__trigger.el-tooltip__trigger {
+    width: auto !important;
+}
+
+.element-date>div{
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px rgb(186,190,197) inset;
+}
+
+/* .element-date>div:hover{
+    box-shadow: 0 0 0 1px rgba(226,226,226, 1) inset;
+} */
+
+.element-date input::placeholder{
+    font-style: italic;
+    font-size: 11px;
+}
+
+.element-date>div.is-focus{
+    box-shadow: 0 0 0 1px rgb(44,160,28) inset;
+}
+

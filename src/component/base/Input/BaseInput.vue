@@ -1,6 +1,6 @@
 <template>
 <div :class="Class">
-    <input :id="id" :type="type" :value="value" :placeholder="placeholder" :class="inputClass" :ref="inputRef">
+    <input :id="id" :type="type" :value="value" :placeholder="placeholder" :class="inputClass" :ref="inputRef" v-model="modelInput">
     <slot></slot>
 </div>
 </template>

@@ -24,7 +24,7 @@
 <BasePopup iconId="iconQuestion" v-if="showPopup == 4">
     <template v-slot:slotText>{{ msg }}</template>
     <div class="btn btn-question">
-        <BaseButton text="Hủy" class="ms-button"  @click="handleCancel"/>
+        <BaseButton text="Hủy" class="ms-button w-600"  @click="handleCancel"/>
         <div class="btn-right">
             <BaseButton text="Không" class="ms-button w-600"  @click="handleClose"/>
             <BaseButton text="Có" class="m-button w-600" style="margin-left: 8px"  @click="handleStore"/>
@@ -54,7 +54,8 @@ export default {
             PopupMode: {
                 Close: 1,
                 Cancel: 2,
-                Save: 3
+                Save: 3, 
+                Store: 4,
             }
         }
     },
@@ -70,6 +71,10 @@ export default {
         // Phát sự kiện ấn nut save
         handleSave() {
             this.emitter.emit("closePopup", this.PopupMode.Save);
+        },
+        // Phát sự kiện ấn nut cất
+        handleStore() {
+            this.emitter.emit("storePopup", this.PopupMode.Store);
         }
     },
     mounted() {
@@ -81,6 +86,10 @@ export default {
             // Bắt sự kiện ấn nút validate form 
             this.emitter.on("openPopupError", (data) => {
                 this.msg = data[0];
+            })
+            // Bắt sự kiện ấn nút close form 
+            this.emitter.on("openPopupWarning", () => {
+                this.msg = "Dữ liệu đã bị thay đổi. Bạn có muốn cất không?";
             })
         }, 1);
     }

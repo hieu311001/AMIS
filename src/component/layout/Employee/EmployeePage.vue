@@ -18,11 +18,13 @@
             </div>
         </div>
         <div class="main-body__table" id="EmployeeTable">
-            <table>
+            <table class="employee-table">
                 <thead>
                     <tr>
                         <th class="space-left"></th>
-                        <th class="checkbox"><input type="checkbox" class="th-checkbox"></th>
+                        <th class="checkbox">
+                            <input type="checkbox" class="input__checkbox">
+                        </th>
                         <th>MÃ NHÂN VIÊN</th>
                         <th>TÊN NHÂN VIÊN</th>
                         <th>GIỚI TÍNH</th>
@@ -38,24 +40,26 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="emp in employees" :key="emp.EmployeeId" class="selectedRow" @dblclick="handleEdit(emp.EmployeeId)">
+                    <tr v-for="emp in employees" :key="emp.EmployeeID" class="selectedRow" @dblclick="handleEdit(emp.EmployeeID)">
                         <td class="space-left"></td>
-                        <td class="checkbox"><input type="checkbox" class="td-checkbox"></td>
+                        <td class="checkbox"  @dblclick.stop="handle">
+                            <input type="checkbox" class="input__checkbox" @click="handleCheckbox">
+                        </td>
                         <td>{{ emp.EmployeeCode }}</td>
-                        <td>{{ emp.FullName }}</td>
-                        <td>{{ emp.GenderName || "Khác" }}</td>
+                        <td>{{ emp.EmployeeName }}</td>
+                        <td>{{ formatGender(emp.Gender) }}</td>
                         <td class="align-center">{{ formatDate(emp.DateOfBirth) }}</td>
                         <td>{{ emp.IdentityNumber }}</td>
                         <td>{{ emp.PositionName }}</td>
                         <td>{{ emp.DepartmentName }}</td>
-                        <td>Chưa có</td>
-                        <td>Chưa có</td>
-                        <td>Chưa có</td>
+                        <td>{{ emp.BankAccount }}</td>
+                        <td>{{ emp.BankName }}</td>
+                        <td>{{ emp.BankBranch }}</td>
                         <td class="task" @dblclick.stop="handle">
                             <div>
-                                <button class="table-btn__edit" @click="handleEdit(emp.EmployeeId)">Sửa</button>
+                                <button class="table-btn__edit" @click="handleEdit(emp.EmployeeID)">Sửa</button>
                                 <button class="table-btn__arrow">
-                                    <div class="btn-arrow__icon" @click="handleOpenTask(emp.EmployeeId, emp.EmployeeCode)"></div>
+                                    <div class="btn-arrow__icon" @click="handleOpenTask(emp.EmployeeID, emp.EmployeeCode)"></div>
                                 </button>
                             </div>
                         </td>
@@ -68,7 +72,14 @@
             <div class="paging-left">Tổng số: <strong>{{ totalEmployee }}</strong> bản ghi</div>
             <div class="paging-right">
                 <div class="record-in-page">
-                    <input type="text" class="input-paging" />
+                    <div class="paging-input">
+                        <input type="text" class="paging-input__input" ref="pagingInput" disabled/>
+                    </div>
+                    <div class="paging-input__icon" @click="handleClickArrow">
+                        <transition>
+                            <div class="icon icon-paging__arrow" ref="pagingArrow"></div>
+                        </transition>
+                    </div>
                 </div>
                 <div class="page-number">
                     <div class="page-prev" style="margin-right:13px">Trước</div>
@@ -88,6 +99,14 @@
     <div class="task-btn__clone">Nhân bản</div>
     <div class="task-btn__delete" @click="handleDelete">Xóa</div>
     <div class="task-btn__stop">Ngừng sử dụng</div>
+</div>
+
+<div class="paging-list" v-show="paging" ref="pagingCombobox">
+    <div class="paging-list__list paging-list_10" @click="handlePagingList">10 bản ghi trên 1 trang</div>
+    <div class="paging-list__list paging-list_20 paging-selected" @click="handlePagingList">20 bản ghi trên 1 trang</div>
+    <div class="paging-list__list paging-list_30" @click="handlePagingList">30 bản ghi trên 1 trang</div>
+    <div class="paging-list__list paging-list_50" @click="handlePagingList" >50 bản ghi trên 1 trang</div>
+    <div class="paging-list__list paging-list_100" @click="handlePagingList">100 bản ghi trên 1 trang</div>
 </div>
 
 <transition name="toast">
@@ -122,6 +141,7 @@ import {
     deleteEmployee
 } from '@/utils/saveEmployee';
 
+
 export default {
     name: "TheContentMain",
     props: {
@@ -141,6 +161,7 @@ export default {
             employeeCode: "",
             popup: 0,
             toast: 0,
+            paging: false,
         };
     },
     components: {
@@ -148,7 +169,7 @@ export default {
         BaseInput,
         FormEmployee,
         PopupMessage,
-        ToastMessage
+        ToastMessage,
     },
     methods: {
         /**
@@ -162,16 +183,16 @@ export default {
             //     this.showLoader = false;
             // }, 1000);
             // Thực hiện nếu lấy dữ liệu thành công
-            if (list != 404) {
+            if (list != 400) {
                 this.employees = list;
                 this.totalEmployee = list.length;
                 this.showLoader = false;
                 this.showOver = false;
-
-                this.openToast(3);
             } else {
                 this.openToast(4);
             }
+
+            return list;
         },
         /**
          * Mở Form Thông Tin Nhân Viên
@@ -196,10 +217,14 @@ export default {
          * Created by VMHIEU 07/08/2022
          */
         async handleEdit(id) {
-            this.showOver = true;
+            try {
+                this.showOver = true;
 
-            let dataForm = await getEmployee(id);
-            this.emitter.emit("openEditForm", dataForm);
+                let dataForm = await getEmployee(id);
+                this.emitter.emit("openEditForm", dataForm);
+            } catch (e) {
+                console.error(e);
+            }
         },
         /**
          * Load lại table khi ấn vào nút cất 
@@ -229,6 +254,33 @@ export default {
             }
         },
         /**
+         * Format ngày tháng
+         * Created by VMHIEU 04/08/2022
+         */
+        formatGender(gender) {
+            let value = "Nữ";
+
+            try {
+                if (gender) {
+                    switch (gender) {
+                        case 0:
+                            value = "Nữ";
+                            break;
+                        case 1: 
+                            value = "Nam";
+                            break;
+                        case 2: 
+                            value = "Khác";
+                            break;
+                    }
+                }
+            } catch (error) {
+                console.log(error);
+            }
+
+            return value;
+        },
+        /**
          * Refresh lại dữ liệu
          * CreatedBy VMHieu 08/08/2022
          */
@@ -236,6 +288,7 @@ export default {
             this.showOver = true;
             this.showLoader = true;
             this.loadEmployees();
+            this.openToast(3);
         },
         /**
          * Mở bảng option
@@ -274,19 +327,62 @@ export default {
             }, 500);
             setTimeout(() => {
                 this.toast = 0;
-            }, 2000);
+            }, 3000);
+        },
+        /**
+         * Sự kiện ấn nút mũi tên phân trang
+         */
+        handleClickArrow(event) {
+            this.$refs.pagingArrow.classList.toggle("up");
+            this.paging = !this.paging;
+
+            let pagingCombobox = this.$refs.pagingCombobox;
+            console.log(event.clientX, event.clientY);
+            pagingCombobox.style.left = (event.clientX - 184) + 'px';
+            pagingCombobox.style.top = (event.clientY - 185) + 'px';
+        },
+        /**
+         * Click chọn số bản ghi / trang
+         */
+        handlePagingList(event) {
+            let menu = document.querySelectorAll(".paging-list__list"),
+                item = event.currentTarget;
+
+            if (menu) {
+                menu.forEach(function (items) {
+                    items.classList.remove("paging-selected");
+                })
+
+                item.classList.add('paging-selected');
+                document.querySelector(".paging-input__input").value = item.innerHTML;
+            }
+
+            this.paging = false;
         }
     },
     created() {
         // Thực hiện lấy dữ liệu Employee
-        this.loadEmployees();
-
+        try{
+            let status  = this.loadEmployees();
+            if(status != 404) {
+                this.openToast(3);
+            }
+        } 
+        catch (ex) {
+            console.log(ex);
+        }
+        
         // Hiệu ứng tối màn hình và loader
         this.showOver = true;
         this.showLoader = true;
     },
     mounted() {
         setTimeout(() => {
+            // Mặc định hiển thị ô paging-selected ở ô input chọn số bản ghi/trang
+            let val = document.querySelector('.paging-input__input'),
+                selected = document.querySelector('.paging-selected');
+
+            val.value = selected.innerHTML;
             /**
              * Bắt sự kiện nhấn nút trong popup
              * CreatedBy VMHieu 10/08/2022
@@ -312,34 +408,34 @@ export default {
                     }
                     this.popup = 0;
                 }),
-            /**
-             * Bắt sự kiện ấn nút close toastMessage
-             * CreatedBy VMHieu 11/08/2022
-             */
-            this.emitter.on("closeToastMessage", () => {
-                this.toast = 0;
-            }),
-            /**
-             * Bắt sự kiện thêm nhân viên thành công
-             * CreatedBy VMHieu 11/08/2022
-             */
-            this.emitter.on("addSuccess", () => {
-                this.openToast(1);
-            }),
-            /**
-             * Bắt sự kiện sửa nhân viên thành công
-             * CreatedBy VMHieu 11/08/2022
-             */
-            this.emitter.on("editSuccess", () => {
-                this.openToast(6);
-            }),
-            /**
-             * Bắt sự kiện thêm/sửa nhân viên thất bại
-             * CreatedBy VMHieu 11/08/2022
-             */
-            this.emitter.on("addFail", () => {
-                this.openToast(5);
-            })
+                /**
+                 * Bắt sự kiện ấn nút close toastMessage
+                 * CreatedBy VMHieu 11/08/2022
+                 */
+                this.emitter.on("closeToastMessage", () => {
+                    this.toast = 0;
+                }),
+                /**
+                 * Bắt sự kiện thêm nhân viên thành công
+                 * CreatedBy VMHieu 11/08/2022
+                 */
+                this.emitter.on("addSuccess", () => {
+                    this.openToast(1);
+                }),
+                /**
+                 * Bắt sự kiện sửa nhân viên thành công
+                 * CreatedBy VMHieu 11/08/2022
+                 */
+                this.emitter.on("editSuccess", () => {
+                    this.openToast(6);
+                }),
+                /**
+                 * Bắt sự kiện thêm/sửa nhân viên thất bại
+                 * CreatedBy VMHieu 11/08/2022
+                 */
+                this.emitter.on("addFail", () => {
+                    this.openToast(5);
+                })
         }, 1);
     }
 }
@@ -442,10 +538,6 @@ export default {
     z-index: 5;
 }
 
-.record-in-page {
-    margin: 0 16px;
-}
-
 .paging-right {
     display: flex;
     align-items: center;
@@ -464,10 +556,110 @@ export default {
     padding: 6.5px;
 }
 
+.page-index,
+.page-prev,
+.page-next {
+    cursor: pointer;
+}
+
 .input-paging {
     box-sizing: border-box;
     height: 30px;
     padding: 0;
+}
+
+.record-in-page {
+    display: flex;
+    min-height: 32px;
+    min-width: 200px;
+    border: 1px solid #babec5;
+    border-radius: 2px;
+    background-color: #fff;
+    overflow: hidden;
+    margin: 0 16px;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.paging-input {
+    display: flex;
+    flex-basis: 100%;
+    flex-grow: 1;
+    flex-wrap: wrap;
+    width: calc(100% - 32px);
+    align-items: center;
+    padding: 0 0 0 10px;
+
+}
+
+.paging-input__input {
+    border: none;
+    font-size: 13px;
+    padding-right: unset;
+    text-overflow: ellipsis;
+    background-color: transparent;
+    display: flex;
+    flex-grow: 1;
+}
+
+.paging-input__icon {
+    width: 32px;
+    height: 32px;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    right: 0;
+    box-sizing: border-box;
+}
+
+.paging-input__icon:hover{
+    background-color: #e0e0e0;
+}
+
+.up {
+    transform: rotate(-180deg);
+    -webkit-transform: rotate(-180deg);
+}
+
+.down {
+    transform: rotate(-180deg);
+    -webkit-transform: rotate(-180deg);
+}
+
+.paging-list{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background-color: #fff;
+    z-index: 1000;
+}
+
+.paging-list__list {
+    flex: 1;
+    padding: 0 14px 0 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 13px;
+    min-width: 176px;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.paging-list__list:hover{
+    color: #35bf22;
+    background-color: #ebedf0;
+}
+
+.paging-selected{
+    background-color: #2ca01c !important;
+    color: #fff !important;
 }
 
 .form-enter-from,
@@ -501,17 +693,17 @@ export default {
 .form-enter-active,
 .over-enter-active,
 .popup-enter-active {
-    transition: all .2s ease;
+    transition: all .3s ;
 }
 
 .form-leave-active,
 .over-leave-active,
 .popup-leave-active {
-    transition: all 0s ease;
+    transition: all 0s ;
 }
 
 .toast-enter-active,
 .toast-leave-active {
-    transition: all .8s ease;
+    transition: all .8s ;
 }
 </style>

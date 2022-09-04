@@ -9,12 +9,12 @@ import axios from "axios";
 export async function addEmployee(data) {
     let status;
 
-    await axios.post(`https://cukcuk.manhnv.net/api/v1/Employees`, data)
+    await axios.post(`https://localhost:7050/api/v1/Employees`, data)
     .then(function (response) {
         status = response.status;
     })
     .catch(function (error) {
-        status = error.response.status;
+        status = error.response;
     })
 
     return status;
@@ -30,7 +30,7 @@ export async function addEmployee(data) {
 export async function editEmployee(data, id) {
     let status;
 
-    await axios.put(`https://cukcuk.manhnv.net/api/v1/Employees/${id}`, data)
+    await axios.put(`https://localhost:7050/api/v1/Employees/${id}`, data)
     .then(function (response) {
         status = response.status;
     })
@@ -50,7 +50,7 @@ export async function editEmployee(data, id) {
 export async function deleteEmployee(id) {
     let status;
 
-    await axios.delete(`https://cukcuk.manhnv.net/api/v1/Employees/${id}`)
+    await axios.delete(`https://localhost:7050/api/v1/Employees/${id}`)
     .then(function (response) {
         status = response.status;
     })
