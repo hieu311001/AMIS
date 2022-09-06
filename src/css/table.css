@@ -5,15 +5,15 @@ table {
     border-spacing: 0;
 }
 
-th {
+.table-th {
     position: sticky;
     top: 0;
     z-index: 1;
     background-color: #e5e8ec;
 }
 
-th,
-td {
+.table-th,
+.table-td {
     padding: 0 16px;
     text-align: left;
     width: auto;
@@ -22,13 +22,13 @@ td {
     text-overflow: ellipsis;
 }
 
-th{
+.table-th{
     height:34px;
     border-right: 1px solid #c7c7c7;
     border-bottom: 1px solid #c7c7c7;
 }
 
-td{
+.table-tr, .table-td{
     height:44px;
     border-right: 1px dotted #c7c7c7;
     border-bottom: 1px solid #c7c7c7;
@@ -89,7 +89,7 @@ td{
     accent-color: #2ca01c;
 }
 
-tr td:nth-child(3) {
+.table-tr .table-td:nth-child(3) {
     position: sticky;
     left: 60px;
     z-index: 2;
@@ -97,20 +97,20 @@ tr td:nth-child(3) {
     border-bottom: 1px solid #c7c7c7;
 }
 
-tr td:nth-child(3){
+.table-tr .table-td:nth-child(3){
     background-color: #fff;
 }
 
-th:nth-child(3) {
+.table-th:nth-child(3) {
     left: 60px;
     z-index: 100;    
 }
 
-.employee-table tr:hover td{
+.employee-table .table-tr:hover .table-td{
     background-color: #e5f3ff;
 }
 
-.employee-table tr:hover td:last-child,.employee-table tr:hover td:first-child{
+.employee-table .table-tr:hover .table-td:last-child,.employee-table .table-tr:hover .table-td:first-child{
     background-color: #fff;
 }
 
@@ -125,7 +125,7 @@ th:nth-child(3) {
     white-space: pre-wrap;
 }
 
-tr:hover td.task button{
+.table-tr:hover .table-td.task button{
     background-color: #e5f3ff;
 }
 

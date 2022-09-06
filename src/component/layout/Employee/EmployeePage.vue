@@ -1,138 +1,140 @@
 <template>
-<div class="content-main">
-    <div class="main-header">
-        <div class="header-left">Nhân viên</div>
-        <div class="header-right">
-            <BaseButton class="m-button ToolbarEmployee" text="Thêm mới nhân viên" @click="handleOpenForm" />
+<div>
+    <div class="content-main">
+        <div class="main-header">
+            <div class="header-left">Nhân viên</div>
+            <div class="header-right">
+                <BaseButton class="m-button ToolbarEmployee" text="Thêm mới nhân viên" @click="handleOpenForm" />
+            </div>
         </div>
-    </div>
-    <div class="main-body">
-        <div class="main-body__filter">
-            <div class="ms-input filter-input">
-                <BaseInput Class="ms-input filter-input" inputClass="input-search filter-input__search" placeholder="Tìm kiếm theo tên, mã nhân viên">
+        <div class="main-body">
+            <div class="main-body__filter">
+                <div class="ms-input filter-input">
+                    <!-- <BaseInput Class="ms-input filter-input" inputClass="input-search filter-input__search" placeholder="Tìm kiếm theo tên, mã nhân viên">
                     <div class="input-search__icon"></div>
-                </BaseInput>
-            </div>
-            <div class="btn-refresh">
-                <div class="icon-refresh icon" @click="refresh"></div>
-            </div>
-        </div>
-        <div class="main-body__table" id="EmployeeTable">
-            <table class="employee-table">
-                <thead>
-                    <tr>
-                        <th class="space-left"></th>
-                        <th class="checkbox">
-                            <input type="checkbox" class="input__checkbox">
-                        </th>
-                        <th>MÃ NHÂN VIÊN</th>
-                        <th>TÊN NHÂN VIÊN</th>
-                        <th>GIỚI TÍNH</th>
-                        <th class="align-center">NGÀY SINH</th>
-                        <th>SỐ CMND</th>
-                        <th>CHỨC DANH</th>
-                        <th>TÊN ĐƠN VỊ</th>
-                        <th>SỐ TÀI KHOẢN</th>
-                        <th>TÊN NGÂN HÀNG</th>
-                        <th>CHI NHÁNH TK NGÂN HÀNG</th>
-                        <th class="task">CHỨC NĂNG</th>
-                        <th class="space-right"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="emp in employees" :key="emp.EmployeeID" class="selectedRow" @dblclick="handleEdit(emp.EmployeeID)">
-                        <td class="space-left"></td>
-                        <td class="checkbox"  @dblclick.stop="handle">
-                            <input type="checkbox" class="input__checkbox" @click="handleCheckbox">
-                        </td>
-                        <td>{{ emp.EmployeeCode }}</td>
-                        <td>{{ emp.EmployeeName }}</td>
-                        <td>{{ formatGender(emp.Gender) }}</td>
-                        <td class="align-center">{{ formatDate(emp.DateOfBirth) }}</td>
-                        <td>{{ emp.IdentityNumber }}</td>
-                        <td>{{ emp.PositionName }}</td>
-                        <td>{{ emp.DepartmentName }}</td>
-                        <td>{{ emp.BankAccount }}</td>
-                        <td>{{ emp.BankName }}</td>
-                        <td>{{ emp.BankBranch }}</td>
-                        <td class="task" @dblclick.stop="handle">
-                            <div>
-                                <button class="table-btn__edit" @click="handleEdit(emp.EmployeeID)">Sửa</button>
-                                <button class="table-btn__arrow">
-                                    <div class="btn-arrow__icon" @click="handleOpenTask(emp.EmployeeID, emp.EmployeeCode)"></div>
-                                </button>
-                            </div>
-                        </td>
-                        <td class="space-right"></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="main-body__paging">
-            <div class="paging-left">Tổng số: <strong>{{ totalEmployee }}</strong> bản ghi</div>
-            <div class="paging-right">
-                <div class="record-in-page">
-                    <div class="paging-input">
-                        <input type="text" class="paging-input__input" ref="pagingInput" disabled/>
-                    </div>
-                    <div class="paging-input__icon" @click="handleClickArrow">
-                        <transition>
-                            <div class="icon icon-paging__arrow" ref="pagingArrow"></div>
-                        </transition>
+                </BaseInput> -->
+                    <div class="ms-input filter-input">
+                        <input id="input-search" type="text" @change="handleSearchChange" placeholder="Tìm kiếm theo tên, mã nhân viên" class="input-search filter-input__search">
+                        <div class="input-search__icon"></div>
                     </div>
                 </div>
-                <div class="page-number">
-                    <div class="page-prev" style="margin-right:13px">Trước</div>
-                    <div class="page-number__number">
-                        <div class="page-index">1</div>
-                        <div class="page-index">2</div>
-                        <div class="page-index">3</div>
-                        <div class="page-index">4</div>
+                <div class="btn-refresh">
+                    <div class="icon-refresh icon" @click="refresh"></div>
+                </div>
+            </div>
+            <div class="main-body__table" id="EmployeeTable">
+                <table class="employee-table">
+                    <thead>
+                        <tr class="table-tr">
+                            <th class="table-th space-left"></th>
+                            <th class="table-th checkbox">
+                                <input type="checkbox" class="input__checkbox">
+                            </th>
+                            <th class="table-th">MÃ NHÂN VIÊN</th>
+                            <th class="table-th">TÊN NHÂN VIÊN</th>
+                            <th class="table-th">GIỚI TÍNH</th>
+                            <th class="table-th align-center">NGÀY SINH</th>
+                            <th class="table-th">SỐ CMND</th>
+                            <th class="table-th">CHỨC DANH</th>
+                            <th class="table-th">TÊN ĐƠN VỊ</th>
+                            <th class="table-th">SỐ TÀI KHOẢN</th>
+                            <th class="table-th">TÊN NGÂN HÀNG</th>
+                            <th class="table-th">CHI NHÁNH TK NGÂN HÀNG</th>
+                            <th class="table-th task">CHỨC NĂNG</th>
+                            <th class="table-th space-right"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="emp in employees" :key="emp.EmployeeID" class="table-tr selectedRow" @dblclick="handleEdit(emp.EmployeeID)">
+                            <td class="table-td space-left"></td>
+                            <td class="table-td checkbox" @dblclick.stop="handle">
+                                <input type="checkbox" class="input__checkbox" @click="handleCheckbox">
+                            </td>
+                            <td class="table-td">{{ emp.EmployeeCode }}</td>
+                            <td class="table-td">{{ emp.EmployeeName }}</td>
+                            <td class="table-td">{{ formatGender(emp.Gender) }}</td>
+                            <td class="table-td align-center">{{ formatDate(emp.DateOfBirth) }}</td>
+                            <td class="table-td">{{ emp.IdentityNumber }}</td>
+                            <td class="table-td">{{ emp.PositionName }}</td>
+                            <td class="table-td">{{ emp.DepartmentName }}</td>
+                            <td class="table-td">{{ emp.BankAccount }}</td>
+                            <td class="table-td">{{ emp.BankName }}</td>
+                            <td class="table-td">{{ emp.BankBranch }}</td>
+                            <td class="table-td task" @dblclick.stop="handle">
+                                <div>
+                                    <button class="table-btn__edit" @click="handleEdit(emp.EmployeeID)">Sửa</button>
+                                    <button class="table-btn__arrow">
+                                        <div class="btn-arrow__icon" @click="handleOpenTask(emp.EmployeeID, emp.EmployeeCode)"></div>
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="table-td space-right"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="main-body__paging">
+                <div class="paging-left">Tổng số: <strong>{{ totalEmployee }}</strong> bản ghi</div>
+                <div class="paging-right">
+                    <div class="record-in-page">
+                        <div class="paging-input">
+                            <input type="text" class="paging-input__input" ref="pagingInput" disabled />
+                        </div>
+                        <div class="paging-input__icon" @click="handleClickArrow">
+                            <transition>
+                                <div class="icon icon-paging__arrow" ref="pagingArrow"></div>
+                            </transition>
+                        </div>
                     </div>
-                    <div class="page-next" style="margin-left:13px">Sau</div>
+                    <div class="page-number">
+                        <div class="page-number__number">
+                            <el-pagination :page-size="20" :pager-count="5" current-page="pageNumber" @update:current-page="handleChangePage" layout="prev, pager, next" :total="totalPage" />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+    <div class="task-combobox" ref="taskCombobox" v-show="showOption">
+        <div class="task-btn__clone">Nhân bản</div>
+        <div class="task-btn__delete" @click="handleDelete">Xóa</div>
+        <div class="task-btn__stop">Ngừng sử dụng</div>
+    </div>
+
+    <div class="paging-list" v-show="paging" ref="pagingCombobox">
+        <div class="paging-list__list paging-list_10" @click="handlePagingList" value="10">10 bản ghi trên 1 trang</div>
+        <div class="paging-list__list paging-list_20 paging-selected" @click="handlePagingList" value="20">20 bản ghi trên 1 trang</div>
+        <div class="paging-list__list paging-list_30" @click="handlePagingList" value="30">30 bản ghi trên 1 trang</div>
+        <div class="paging-list__list paging-list_50" @click="handlePagingList" value="50">50 bản ghi trên 1 trang</div>
+        <div class="paging-list__list paging-list_100" @click="handlePagingList" value="100">100 bản ghi trên 1 trang</div>
+    </div>
+
+    <transition name="toast">
+        <ToastMessage :showToast="toast" />
+    </transition>
+    <transition name="form">
+        <FormEmployee @handleCloseForm="handleCloseForm" @resetTable="resetTable" @resetTableSave="resetTableSave" />
+    </transition>
+
+    <div id="over" v-show="showOver"></div>
+
+    <transition name="popup">
+        <PopupMessage :showPopup="popup" />
+    </transition>
+
+    <div class="loader" v-show="showLoader"></div>
 </div>
-<div class="task-combobox" ref="taskCombobox" v-show="showOption">
-    <div class="task-btn__clone">Nhân bản</div>
-    <div class="task-btn__delete" @click="handleDelete">Xóa</div>
-    <div class="task-btn__stop">Ngừng sử dụng</div>
-</div>
-
-<div class="paging-list" v-show="paging" ref="pagingCombobox">
-    <div class="paging-list__list paging-list_10" @click="handlePagingList">10 bản ghi trên 1 trang</div>
-    <div class="paging-list__list paging-list_20 paging-selected" @click="handlePagingList">20 bản ghi trên 1 trang</div>
-    <div class="paging-list__list paging-list_30" @click="handlePagingList">30 bản ghi trên 1 trang</div>
-    <div class="paging-list__list paging-list_50" @click="handlePagingList" >50 bản ghi trên 1 trang</div>
-    <div class="paging-list__list paging-list_100" @click="handlePagingList">100 bản ghi trên 1 trang</div>
-</div>
-
-<transition name="toast">
-    <ToastMessage :showToast="toast" />
-</transition>
-<transition name="form">
-    <FormEmployee @handleCloseForm="handleCloseForm" @resetTable="resetTable" @resetTableSave="resetTableSave" />
-</transition>
-
-<div id="over" v-show="showOver"></div>
-
-<transition name="popup">
-    <PopupMessage :showPopup="popup" />
-</transition>
-
-<div class="loader" v-show="showLoader"></div>
 </template>
 
 <script>
 import BaseButton from '@/component/base/Button/BaseButton.vue';
-import BaseInput from "@/component/base/Input/BaseInput.vue";
+// import BaseInput from "@/component/base/Input/BaseInput.vue";
 import FormEmployee from '@/component/view/FormEmployee.vue';
 import PopupMessage from '@/component/view/PopupMessage.vue';
 import ToastMessage from '@/component/view/ToastMessage.vue';
 import {
-    loadEmployees
+    loadEmployees,
+    filterEmployees
 } from '@/utils/loadEmployees';
 import {
     getEmployee
@@ -140,7 +142,6 @@ import {
 import {
     deleteEmployee
 } from '@/utils/saveEmployee';
-
 
 export default {
     name: "TheContentMain",
@@ -162,11 +163,15 @@ export default {
             popup: 0,
             toast: 0,
             paging: false,
+            pageNumber: "1",
+            pageSize: "20",
+            searchKeywords: "",
+            totalPage: "",
         };
     },
     components: {
         BaseButton,
-        BaseInput,
+        //BaseInput,
         FormEmployee,
         PopupMessage,
         ToastMessage,
@@ -178,19 +183,35 @@ export default {
          */
         async loadEmployees() {
             let list = await loadEmployees();
-            // setTimeout(() => {
-            //     this.showOver = false;
-            //     this.showLoader = false;
-            // }, 1000);
             // Thực hiện nếu lấy dữ liệu thành công
-            if (list != 400) {
+            if (list == 400 || list == 0) {
+                this.openToast(4);
+            } else {
                 this.employees = list;
                 this.totalEmployee = list.length;
-                this.showLoader = false;
-                this.showOver = false;
-            } else {
-                this.openToast(4);
             }
+            this.showLoader = false;
+            this.showOver = false;
+
+            return list;
+        },
+        /**
+         * Lấy toàn bộ bản ghi Employee thực hiện tìm kiếm và phân trang
+         * Created by VMHIEU 04/08/2022
+         */
+        async filterEmployees() {
+            let list = await filterEmployees(this.searchKeywords, this.pageSize, this.pageNumber);
+
+            // Thực hiện nếu lấy dữ liệu thành công
+            if (list == 400 || list == 0) {
+                this.openToast(4);
+            } else {
+                this.employees = list["Data"];
+                this.totalEmployee = list["TotalCount"];
+                //this.totalPage = this.totalEmployee*10/parseInt(this.pageSize);
+            }
+            this.showLoader = false;
+            this.showOver = false;
 
             return list;
         },
@@ -220,6 +241,7 @@ export default {
             try {
                 this.showOver = true;
 
+                // Lấy id của nhân viên cần sửa gửi xuống component Form
                 let dataForm = await getEmployee(id);
                 this.emitter.emit("openEditForm", dataForm);
             } catch (e) {
@@ -230,10 +252,9 @@ export default {
          * Load lại table khi ấn vào nút cất 
          */
         async resetTable() {
-            let list = await loadEmployees();
+            let list =  this.filterEmployees();
 
             this.employees = list;
-
         },
         /**
          * Format ngày tháng
@@ -254,22 +275,23 @@ export default {
             }
         },
         /**
-         * Format ngày tháng
+         * Format giới tính
          * Created by VMHIEU 04/08/2022
          */
         formatGender(gender) {
-            let value = "Nữ";
+            let value = "";
 
             try {
-                if (gender) {
+                if (gender != null) {
+                    value = "Nữ";
                     switch (gender) {
                         case 0:
                             value = "Nữ";
                             break;
-                        case 1: 
+                        case 1:
                             value = "Nam";
                             break;
-                        case 2: 
+                        case 2:
                             value = "Khác";
                             break;
                     }
@@ -285,9 +307,29 @@ export default {
          * CreatedBy VMHieu 08/08/2022
          */
         refresh() {
+            // Hiển thị hiệu ứng loading và tối màn hình
             this.showOver = true;
             this.showLoader = true;
-            this.loadEmployees();
+
+            // Đặt lại các điều kiện phân trang và tìm kiếm
+            this.searchKeywords = "";
+            this.pageNumber = "1";
+            this.pageSize = "20";
+
+            // Đặt lại ô input search về rỗng
+            this.$el.querySelector("#input-search").value = "";
+
+            // Đặt lại pageSize về mặc định là 2022
+            this.$el.querySelectorAll(".paging-list__list").forEach((item) => {
+                item.classList.remove('paging-selected');
+                if (item.getAttribute("value") == "20"){
+                    item.classList.add('paging-selected');
+                    this.$el.querySelector(".paging-input__input").value = item.innerHTML;
+                }
+            })
+
+            // Load lại trang và đưa ra thông báo
+            this.filterEmployees();
             this.openToast(3);
         },
         /**
@@ -302,6 +344,7 @@ export default {
             this.employeeId = id;
             this.employeeCode = code;
 
+            // Lấy tọa độ nút ấn để hiển thị combobox
             let taskOption = this.$refs.taskCombobox;
 
             taskOption.style.left = (event.clientX + 10) + 'px';
@@ -314,6 +357,7 @@ export default {
         async handleDelete() {
             this.emitter.emit("openPopupDelete", this.employeeCode);
             this.popup = 1;
+
             this.showOver = true;
             this.showOption = false;
         },
@@ -336,8 +380,9 @@ export default {
             this.$refs.pagingArrow.classList.toggle("up");
             this.paging = !this.paging;
 
+            // Lấy tọa độ nút ấn để hiển thị combobox
             let pagingCombobox = this.$refs.pagingCombobox;
-            console.log(event.clientX, event.clientY);
+
             pagingCombobox.style.left = (event.clientX - 184) + 'px';
             pagingCombobox.style.top = (event.clientY - 185) + 'px';
         },
@@ -354,33 +399,55 @@ export default {
                 })
 
                 item.classList.add('paging-selected');
-                document.querySelector(".paging-input__input").value = item.innerHTML;
+                this.$el.querySelector(".paging-input__input").value = item.innerHTML;
+
+                this.pageSize = item.getAttribute("value");
+                this.filterEmployees();
             }
 
             this.paging = false;
+        },
+        /**
+         * Lấy page-number khi thay đổi page
+         */
+        handleChangePage(val) {
+            this.pageNumber = val;
+            this.filterEmployees();
+        },
+        /**
+         * Lấy keyword để search
+         */
+        handleSearchChange(event) {
+            let item = event.currentTarget;
+
+            this.searchKeywords = item.value;
+            this.filterEmployees();
         }
     },
     created() {
-        // Thực hiện lấy dữ liệu Employee
-        try{
-            let status  = this.loadEmployees();
-            if(status != 404) {
-                this.openToast(3);
-            }
-        } 
-        catch (ex) {
-            console.log(ex);
-        }
-        
         // Hiệu ứng tối màn hình và loader
         this.showOver = true;
         this.showLoader = true;
     },
     mounted() {
         setTimeout(() => {
+            // Thực hiện lấy dữ liệu Employee
+            try {
+                let status = this.filterEmployees();
+                if (status != 400 && status != 0 && status != 500) {
+                    this.openToast(3);
+                } else {
+                    this.openToast(4);
+                }
+                this.showLoader = false;
+                this.showOver = false;
+            } catch (ex) {
+                console.log(ex);
+            }
+
             // Mặc định hiển thị ô paging-selected ở ô input chọn số bản ghi/trang
-            let val = document.querySelector('.paging-input__input'),
-                selected = document.querySelector('.paging-selected');
+            let val = this.$el.querySelector('.paging-input__input'),
+                selected = this.$el.querySelector('.paging-selected');
 
             val.value = selected.innerHTML;
             /**
@@ -616,7 +683,7 @@ export default {
     box-sizing: border-box;
 }
 
-.paging-input__icon:hover{
+.paging-input__icon:hover {
     background-color: #e0e0e0;
 }
 
@@ -630,7 +697,7 @@ export default {
     -webkit-transform: rotate(-180deg);
 }
 
-.paging-list{
+.paging-list {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -652,12 +719,12 @@ export default {
     cursor: pointer;
 }
 
-.paging-list__list:hover{
+.paging-list__list:hover {
     color: #35bf22;
     background-color: #ebedf0;
 }
 
-.paging-selected{
+.paging-selected {
     background-color: #2ca01c !important;
     color: #fff !important;
 }
@@ -693,17 +760,17 @@ export default {
 .form-enter-active,
 .over-enter-active,
 .popup-enter-active {
-    transition: all .3s ;
+    transition: all .3s;
 }
 
 .form-leave-active,
 .over-leave-active,
 .popup-leave-active {
-    transition: all 0s ;
+    transition: all 0s;
 }
 
 .toast-enter-active,
 .toast-leave-active {
-    transition: all .8s ;
+    transition: all .8s;
 }
 </style>

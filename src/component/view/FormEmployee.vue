@@ -417,10 +417,12 @@ export default {
             if (isValid) {
                 employee = this.getDataForm();
 
+                // Thực hiện xử lý dữ liệu khi ở form Add
                 if (this.CurrentFormMode == this.FormMode.Add) {
                     status = await addEmployee(employee);
 
                     if (status == 201) {
+                        // ResetForm sau đó đóng form
                         this.resetForm();
                         this.cancelForm();
                         this.$emit("resetTable");
@@ -428,10 +430,13 @@ export default {
                     } else {
                         this.emitter.emit("addFail");
                     }
-                } else if (this.CurrentFormMode == this.FormMode.Edit) {
+                } 
+                // Thực hiện xử lý dữ liệu khi ở form Edit
+                else if (this.CurrentFormMode == this.FormMode.Edit) {
                     status = await editEmployee(employee, this.employeeID);
 
                     if (status == 200) {
+                        // ResetForm sau đó đóng form
                         this.resetForm();
                         this.cancelForm();
                         this.$emit("resetTable");
@@ -453,20 +458,25 @@ export default {
 
             if (isValid) {
                 employee = this.getDataForm();
+                // Thực hiện xử lý dữ liệu khi ở form Add
                 if (this.CurrentFormMode == this.FormMode.Add) {
                     status = await addEmployee(employee);
 
                     if (status == 201) {
+                        // ResetForm và giữ nguyên Form
                         this.resetForm();
                         this.$emit("resetTable");
                         this.emitter.emit("addSuccess");
                     } else {
                         this.emitter.emit("addFail");
                     }
-                } else if (this.CurrentFormMode == this.FormMode.Edit) {
+                } 
+                // Thực hiện xử lý dữ liệu khi ở form Edit
+                else if (this.CurrentFormMode == this.FormMode.Edit) {
                     status = await editEmployee(employee, this.employeeID);
 
                     if (status == 200) {
+                        // ResetForm và giữ nguyên Form
                         this.resetForm();
                         this.$emit("resetTable");
                         this.emitter.emit("editSuccess");
