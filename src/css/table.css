@@ -216,4 +216,24 @@ thead .task{
     border-left: 1px solid #c7c7c7;
 }
 
+.table-unresult{
+    padding: 20px;
+    background-color: #fff;
+}
+
+
+.nodata img{
+    position: sticky;
+    margin: 50px 50px 30px;
+    width: 132px;
+    height: 74px;
+    left: 45%;
+}
+
+.nodata span{
+    position: sticky;
+    left: 45%;
+    padding-left: 20px;
+}
+
 

@@ -11,7 +11,7 @@ export async function addEmployee(data) {
 
     await axios.post(`https://localhost:7050/api/v1/Employees`, data)
     .then(function (response) {
-        status = response.status;
+        status = response;
     })
     .catch(function (error) {
         status = error.response;
@@ -50,13 +50,15 @@ export async function editEmployee(data, id) {
 export async function deleteEmployee(id) {
     let status;
 
-    await axios.delete(`https://localhost:7050/api/v1/Employees/${id}`)
-    .then(function (response) {
-        status = response.status;
-    })
-    .catch(function (error) {
-        status = error.response.status;
-    })
+    if(id){
+        await axios.delete(`https://localhost:7050/api/v1/Employees/${id}`)
+        .then(function (response) {
+            status = response.status;
+        })
+        .catch(function (error) {
+            status = error.response.status;
+        })
+    }
 
     return status;
 }

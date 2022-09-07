@@ -217,11 +217,20 @@ export default {
                 departmentName: "departmentName",
             },
             error: {
-                code: "Mã không được để trống",
-                name: "Tên không được để trống",
+                code: 1,            //Mã không được để trống
+                name: 2,            //Tên không được để trống
+                department: 3,      //Đơn vị không được để trống
+                date: 4,            //Thời gian vượt qua thời điểm hiện tại
+                email: 5,           //Email không đúng định dạng"
+                unique: 6           //Mã nhân viên đã tồn tại trong hệ thống
+            },
+            errorMsg: {
+                code:       "Mã không được để trống",
+                name:       "Tên không được để trống",
                 department: "Đơn vị không được để trống",
-                date: "Thời gian vượt qua thời điểm hiện tại",
-                email: "Email không đúng định dạng",
+                date:       "Thời gian vượt qua thời điểm hiện tại",
+                email:      "Email không đúng định dạng",
+                unique:     "Mã nhân viên đã tồn tại trong hệ thống",
             },
             CurrentFormMode: 1,
             showForm: false,
@@ -236,10 +245,238 @@ export default {
     },
     methods: {
         /**
+         * 1. Validate dữ liệu trước khi gửi lên server
+         * Created by VMHieu 07/08/2022
+         */
+        validateForm() {
+            let me = this.$el,
+                isValid = true,
+                error = [];
+
+            // Validate trường Required
+            me.querySelectorAll('[Required]').forEach((required) => {
+                let val = required.querySelector("input");
+
+                if (!val.value) {
+                    isValid = false;
+
+                    val.classList.add("m-input__error");
+
+                    // Mã nhân viên không được để trống
+                    if (val.id == this.required.employeeCode || required.id == this.required.employeeCode) {
+                        val.setAttribute("title", this.errorMsg.code);
+                        error.push(this.error.code);
+                    } 
+                    // Tên nhân viên không được để trống
+                    else if (val.id == this.required.employeeName || required.id == this.required.employeeName) {
+                        val.setAttribute("title", this.errorMsg.name);
+                        error.push(this.error.name);
+                    } 
+                    // Đơn vị không được để trống
+                    else if (val.id == this.required.departmentName || required.id == this.required.departmentName) {
+                        val.setAttribute("title", this.errorMsg.department);
+                        error.push(this.error.department)
+                    }
+
+                } else {
+                    val.setAttribute("title", "");
+                    val.classList.remove("m-input__error");
+                }
+            })
+            // Validate trường Date
+            me.querySelectorAll('.el-input').forEach((date) => {
+                let val = date.querySelector(".el-input__wrapper"),
+                    input = val.querySelector("input").value,
+                    today = new Date();
+
+                // Ngày không được quá ngày hiện tại
+                if (input != "" && new Date(this.formatDate(input)) > today) {
+                    isValid = false;
+
+                    val.classList.add("m-input__error");
+                    val.setAttribute("title", this.errorMsg.date);
+                    error.push(this.error.date);
+                } else {
+                    val.setAttribute("title", "");
+                    val.classList.remove("m-input__error");
+                }
+            })
+            // Validate email
+            me.querySelectorAll('[DataType="Email"]').forEach((email) => {
+                let val = email.querySelector("input");
+
+                if (!val.value
+                    .match(
+                        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+                    ) && val.value.replace(/\s/g, '').length > 0) {
+                    isValid = false;
+
+                    val.classList.add("m-input__error");
+                    val.setAttribute("title", this.errorMsg.email);
+                    error.push(this.error.email);
+                } else {
+                    val.setAttribute("title", "");
+                    val.classList.remove("m-input__error");
+                }
+            })
+
+            // Nếu có lỗi thì gửi tín hiệu để hiển thị popup cảnh báo
+            if (error.length > 0) {
+                this.popup = 3;
+                this.showOverForm = true;
+                this.emitter.emit("openPopupError", error);
+            }
+
+            return isValid;
+        },
+        /**
+         * 2. Lấy dữ liệu của employee đã nhập từ form
+         * Created by VMHieu 06/08/2022
+         */
+        getDataForm() {
+            let me = this.$el;
+
+            // Lấy giá trị trường date
+            let dateOfBirth = me.querySelector("#dateOfBirth").value,
+                identityDate = me.querySelector("#identityDate").value;
+
+            // Khởi tạo đối tượng employee
+            let employee = {
+                "EmployeeCode": me.querySelector("#employeeCode").value,
+                "EmployeeName": me.querySelector("#employeeName").value,
+                "DepartmentID": me.querySelector("#departmentName").value,
+                "PositionName": me.querySelector("#positionName").value,
+                "DateOfBirth": dateOfBirth != "" ? this.formatDate(dateOfBirth) : null,
+                "IdentityNumber": me.querySelector("#identityNumber").value,
+                "IdentityDate": identityDate != "" ? this.formatDate(identityDate) : null,
+                "IdentityPlace": me.querySelector("#identityPlace").value,
+                "Address": me.querySelector("#address").value,
+                "PhoneNumber": me.querySelector("#phoneNumber").value,
+                "HotLine": me.querySelector("#hotLine").value,
+                "BankAccount": me.querySelector("#bankAccount").value,
+                "BankName": me.querySelector("#bankName").value,
+                "BankBranch": me.querySelector("#bankBranch").value,
+                "Email": me.querySelector("#email").value,
+                "Gender": parseInt(this.gender),
+            }
+
+            return employee;
+        },
+        /**
+         * 3.1 Cất dữ liệu
+         * Created by VMHieu 07/08/2022
+         */
+        async handleStore() {
+            let isValid = this.validateForm(),
+                employee,
+                response,
+                status,
+                error = [];
+
+            if (isValid) {
+                employee = this.getDataForm();
+
+                // Thực hiện xử lý dữ liệu khi ở form Add
+                if (this.CurrentFormMode == this.FormMode.Add) {
+                    response = await addEmployee(employee);
+                    
+                    if (response.status == 201) {
+                        // ResetForm sau đó đóng form
+                        this.resetForm();
+                        this.cancelForm();
+                        this.$emit("resetTable");
+                        this.emitter.emit("addSuccess");
+                    } else if (response.status == 400){
+                        // Hiển thị lỗi mã trùng:
+                        if (response.data.errorMsg.includes("Mã nhân viên đã tồn tại trong hệ thống")) {
+                            error.push(this.error.unique);
+                            // Nếu có lỗi thì gửi tín hiệu để hiển thị popup cảnh báo
+                            if (error.length > 0) {
+                                this.popup = 3;
+                                this.showOverForm = true;
+                                this.emitter.emit("openPopupError", error);
+                            }
+                        }
+                    }
+                    else {
+                        this.emitter.emit("addFail");
+                    }
+                } 
+                // Thực hiện xử lý dữ liệu khi ở form Edit
+                else if (this.CurrentFormMode == this.FormMode.Edit) {
+                    status = await editEmployee(employee, this.employeeID);
+
+                    if (status == 200) {
+                        // ResetForm sau đó đóng form
+                        this.resetForm();
+                        this.cancelForm();
+                        this.$emit("resetTable");
+                        this.emitter.emit("editSuccess");
+                    } else {
+                        this.emitter.emit("addFail");
+                    }
+                }
+            }
+        },
+        /**
+         * 3.2 Cất và thêm dữ liệu
+         * Created by VMHieu 07/08/2022
+         */
+        async handleSave() {
+            let isValid = this.validateForm(),
+                employee,
+                response,
+                error = [],
+                status;
+
+            if (isValid) {
+                employee = this.getDataForm();
+                // Thực hiện xử lý dữ liệu khi ở form Add
+                if (this.CurrentFormMode == this.FormMode.Add) {
+                    response = await addEmployee(employee);
+
+                    if (response.status == 201) {
+                        // ResetForm và giữ nguyên Form
+                        this.resetForm();
+                        this.$emit("resetTable");
+                        this.emitter.emit("addSuccess", "Save");
+                    } else if (response.status == 400){
+                        // Hiển thị lỗi mã trùng:
+                        if (response.data.errorMsg.includes("Mã nhân viên đã tồn tại trong hệ thống")) {
+                            error.push(this.error.unique);
+                            // Nếu có lỗi thì gửi tín hiệu để hiển thị popup cảnh báo
+                            if (error.length > 0) {
+                                this.popup = 3;
+                                this.showOverForm = true;
+                                this.emitter.emit("openPopupError", error);
+                            }
+                        }
+                    } else {
+                        this.emitter.emit("addFail", "Save");
+                    }
+                } 
+                // Thực hiện xử lý dữ liệu khi ở form Edit
+                else if (this.CurrentFormMode == this.FormMode.Edit) {
+                    status = await editEmployee(employee, this.employeeID);
+
+                    if (status == 200) {
+                        // ResetForm và giữ nguyên Form
+                        this.resetForm();
+                        this.$emit("resetTable");
+                        this.emitter.emit("editSuccess");
+                    } else {
+                        this.emitter.emit("addFail");
+                    }
+
+                    this.CurrentFormMode == this.FormMode.Add;
+                }
+            }
+        },
+        /**
          * Hủy Form 
          * Created by VMHieu 04/08/2022
          */
-        cancelForm() {
+         cancelForm() {
             this.$emit("handleCloseForm");
             this.emitter.emit("closeForm");
             this.resetForm();
@@ -273,218 +510,26 @@ export default {
          * Reset form khi add xong
          * Created by VMHieu 07/08/2022
          */
-        resetForm() {
+        async resetForm() {
             let me = this.$el;
+            let code = await getEmployeeMaxCode();
 
+            // Đặt lại giá trị của các ô input
             me.querySelectorAll("input").forEach((input) => {
                 input.value = "";
                 input.classList.remove("m-input__error");
             })
 
-            var checkbox = me.querySelectorAll("input[type='radio']");
-            for (var i = 0; i < checkbox.length; i++) {
-                if (checkbox[i].checked === true) {
-                    checkbox[i].checked = false;
-                }
-            }
+            me.querySelector("#employeeCode").value = code['data'];
+            me.querySelector("#employeeCode").focus();
 
             this.showOverForm = false;
             this.popup = 0;
 
+            // Đặt lại các trường input binding 2 chiều
             this.dateOfBirth = "";
             this.identityDate = "";
-            this.gender = "";
-        },
-        /**
-         * Validate dữ liệu trước khi gửi lên server
-         * Created by VMHieu 07/08/2022
-         */
-        validateForm() {
-            let me = this.$el,
-                isValid = true,
-                error = [];
-
-            // Validate trường Required
-            me.querySelectorAll('[Required]').forEach((required) => {
-                let val = required.querySelector("input");
-
-                if (!val.value) {
-                    isValid = false;
-
-                    val.classList.add("m-input__error");
-
-                    if (val.id == this.required.employeeCode || required.id == this.required.employeeCode) {
-                        val.setAttribute("title", this.error.code);
-                        error.push(this.error.code);
-                    } else if (val.id == this.required.employeeName || required.id == this.required.employeeName) {
-                        val.setAttribute("title", this.error.name);
-                        error.push(this.error.name);
-                    } else if (val.id == this.required.departmentName || required.id == this.required.departmentName) {
-                        val.setAttribute("title", this.error.department);
-                        error.push(this.error.department)
-                    }
-
-                } else {
-                    val.setAttribute("title", "");
-                    val.classList.remove("m-input__error");
-                }
-            })
-            // Validate trường Date
-            me.querySelectorAll('.el-input').forEach((date) => {
-                let val = date.querySelector(".el-input__wrapper"),
-                    input = val.querySelector("input").value,
-                    today = new Date();
-
-                if (input != "" && new Date(this.formatDate(input)) > today) {
-                    isValid = false;
-
-                    val.classList.add("m-input__error");
-                    val.setAttribute("title", this.error.date);
-                    error.push(this.error.date);
-                } else {
-                    val.setAttribute("title", "");
-                    val.classList.remove("m-input__error");
-                }
-            })
-            // Validate email
-            me.querySelectorAll('[DataType="Email"]').forEach((email) => {
-                let val = email.querySelector("input");
-
-                if (!val.value
-                    .match(
-                        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-                    ) && val.value.replace(/\s/g, '').length > 0) {
-                    isValid = false;
-
-                    val.classList.add("m-input__error");
-                    val.setAttribute("title", this.error.email);
-                    error.push(this.error.email);
-                } else {
-                    val.setAttribute("title", "");
-                    val.classList.remove("m-input__error");
-                }
-            })
-
-            if (error.length > 0) {
-                this.popup = 3;
-                this.showOverForm = true;
-                this.emitter.emit("openPopupError", error);
-            }
-
-            return isValid;
-        },
-        /**
-         * Lấy dữ liệu của employee đã nhập từ form
-         * Created by VMHieu 06/08/2022
-         */
-        getDataForm() {
-            let me = this.$el;
-
-            let dateOfBirth = me.querySelector("#dateOfBirth").value,
-                identityDate = me.querySelector("#identityDate").value;
-
-
-            let employee = {
-                "EmployeeCode": me.querySelector("#employeeCode").value,
-                "EmployeeName": me.querySelector("#employeeName").value,
-                "DepartmentID": me.querySelector("#departmentName").value,
-                "PositionName": me.querySelector("#positionName").value,
-                "DateOfBirth": dateOfBirth != "" ? this.formatDate(dateOfBirth) : null,
-                "IdentityNumber": me.querySelector("#identityNumber").value,
-                "IdentityDate": identityDate != "" ? this.formatDate(identityDate) : null,
-                "IdentityPlace": me.querySelector("#identityPlace").value,
-                "Address": me.querySelector("#address").value,
-                "PhoneNumber": me.querySelector("#phoneNumber").value,
-                "HotLine": me.querySelector("#hotLine").value,
-                "BankAccount": me.querySelector("#bankAccount").value,
-                "BankName": me.querySelector("#bankName").value,
-                "BankBranch": me.querySelector("#bankBranch").value,
-                "Email": me.querySelector("#email").value,
-                "Gender": parseInt(this.gender),
-            }
-
-            return employee;
-        },
-        /**
-         * Cất dữ liệu
-         * Created by VMHieu 07/08/2022
-         */
-        async handleStore() {
-            let isValid = this.validateForm(),
-                employee,
-                status;
-
-            if (isValid) {
-                employee = this.getDataForm();
-
-                // Thực hiện xử lý dữ liệu khi ở form Add
-                if (this.CurrentFormMode == this.FormMode.Add) {
-                    status = await addEmployee(employee);
-
-                    if (status == 201) {
-                        // ResetForm sau đó đóng form
-                        this.resetForm();
-                        this.cancelForm();
-                        this.$emit("resetTable");
-                        this.emitter.emit("addSuccess");
-                    } else {
-                        this.emitter.emit("addFail");
-                    }
-                } 
-                // Thực hiện xử lý dữ liệu khi ở form Edit
-                else if (this.CurrentFormMode == this.FormMode.Edit) {
-                    status = await editEmployee(employee, this.employeeID);
-
-                    if (status == 200) {
-                        // ResetForm sau đó đóng form
-                        this.resetForm();
-                        this.cancelForm();
-                        this.$emit("resetTable");
-                        this.emitter.emit("editSuccess");
-                    } else {
-                        this.emitter.emit("addFail");
-                    }
-                }
-            }
-        },
-        /**
-         * Cất và thêm dữ liệu
-         * Created by VMHieu 07/08/2022
-         */
-        async handleSave() {
-            let isValid = this.validateForm(),
-                employee,
-                status;
-
-            if (isValid) {
-                employee = this.getDataForm();
-                // Thực hiện xử lý dữ liệu khi ở form Add
-                if (this.CurrentFormMode == this.FormMode.Add) {
-                    status = await addEmployee(employee);
-
-                    if (status == 201) {
-                        // ResetForm và giữ nguyên Form
-                        this.resetForm();
-                        this.$emit("resetTable");
-                        this.emitter.emit("addSuccess");
-                    } else {
-                        this.emitter.emit("addFail");
-                    }
-                } 
-                // Thực hiện xử lý dữ liệu khi ở form Edit
-                else if (this.CurrentFormMode == this.FormMode.Edit) {
-                    status = await editEmployee(employee, this.employeeID);
-
-                    if (status == 200) {
-                        // ResetForm và giữ nguyên Form
-                        this.resetForm();
-                        this.$emit("resetTable");
-                        this.emitter.emit("editSuccess");
-                    } else {
-                        this.emitter.emit("addFail");
-                    }
-                }
-            }
+            this.gender = "1";
         },
         /**
          * Format date
@@ -553,11 +598,8 @@ export default {
 
                 // Binding dữ liệu ra các ô input
                 if (employeeData.DateOfBirth) {
-                    // dateOfBirth = this.formatDate(employeeData.DateOfBirth);
-                    // this.dateOfBirth = dateOfBirth;
                     this.dateOfBirth = employeeData.DateOfBirth;
                 }
-
                 if (employeeData.IdentityDate) {
                     this.identityDate = employeeData.IdentityDate;
                 }
@@ -575,8 +617,6 @@ export default {
                 me.querySelector("#bankAccount").value = employeeData.BankAccount;
                 me.querySelector("#hotLine").value = employeeData.HotLine;
                 
-                this.gender = employeeData.Gender;
-
                 if (employeeData.DepartmentID) {
                     let department = await getDepartment(employeeData.DepartmentID);
 
@@ -584,11 +624,7 @@ export default {
                     me.querySelector("#departmentName").value = employeeData.DepartmentID;
                 }
 
-                // if (employeeData.PositionId) {
-                //     let position = await getPosition(employeeData.PositionId);
-
-                //     me.querySelector("#positionName input").value = position.PositionName;
-                // }
+                this.gender = employeeData.Gender.toString();
             })
             /**
              * Lắng nghe sự kiện ấn nút đóng form

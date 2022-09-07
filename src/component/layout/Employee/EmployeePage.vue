@@ -44,7 +44,7 @@
                             <th class="table-th space-right"></th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody v-show="showResult">
                         <tr v-for="emp in employees" :key="emp.EmployeeID" class="table-tr selectedRow" @dblclick="handleEdit(emp.EmployeeID)">
                             <td class="table-td space-left"></td>
                             <td class="table-td checkbox" @dblclick.stop="handle">
@@ -73,7 +73,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="main-body__paging">
+            <div class="main-body__paging" v-show="showResult">
                 <div class="paging-left">Tổng số: <strong>{{ totalEmployee }}</strong> bản ghi</div>
                 <div class="paging-right">
                     <div class="record-in-page">
@@ -88,9 +88,16 @@
                     </div>
                     <div class="page-number">
                         <div class="page-number__number">
-                            <el-pagination :page-size="20" :pager-count="5" current-page="pageNumber" @update:current-page="handleChangePage" layout="prev, pager, next" :total="totalPage" />
+                            <el-pagination :page-size="pageSize" :pager-count="5" :current-page="pageNumber" @update:current-page="handleChangePage" layout="prev, pager, next" :total="totalPage" />
                         </div>
                     </div>
+                </div>
+            </div>
+            <div class="table-unresult" v-show="!showResult">
+                <div class="nodata">
+                    <img src="@/assets/icon/bg_report_nodata.76e50bd8.svg" class="nodata-img" />
+                    <br />
+                    <span>Không có dữ liệu</span>
                 </div>
             </div>
         </div>
@@ -163,10 +170,11 @@ export default {
             popup: 0,
             toast: 0,
             paging: false,
-            pageNumber: "1",
+            pageNumber: 1,
             pageSize: "20",
             searchKeywords: "",
             totalPage: "",
+            showResult: true,
         };
     },
     components: {
@@ -205,13 +213,19 @@ export default {
             // Thực hiện nếu lấy dữ liệu thành công
             if (list == 400 || list == 0) {
                 this.openToast(4);
+                this.showResult = false;
             } else {
+                this.openToast(3);
                 this.employees = list["Data"];
                 this.totalEmployee = list["TotalCount"];
-                //this.totalPage = this.totalEmployee*10/parseInt(this.pageSize);
+                this.totalPage = Math.round(this.totalEmployee * 10 / parseInt(this.pageSize));
+
+                if(this.totalEmployee == 0) {
+                    this.showResult = false;
+                } else {
+                    this.showResult = true;
+                }
             }
-            this.showLoader = false;
-            this.showOver = false;
 
             return list;
         },
@@ -223,6 +237,7 @@ export default {
             this.showOver = true;
 
             this.emitter.emit("openAddForm");
+            this.showOption = false;
         },
         /**
          * Đóng Form Thông Tin Nhân Viên
@@ -252,7 +267,7 @@ export default {
          * Load lại table khi ấn vào nút cất 
          */
         async resetTable() {
-            let list =  this.filterEmployees();
+            let list = this.filterEmployees();
 
             this.employees = list;
         },
@@ -313,7 +328,7 @@ export default {
 
             // Đặt lại các điều kiện phân trang và tìm kiếm
             this.searchKeywords = "";
-            this.pageNumber = "1";
+            this.pageNumber = 1;
             this.pageSize = "20";
 
             // Đặt lại ô input search về rỗng
@@ -322,7 +337,7 @@ export default {
             // Đặt lại pageSize về mặc định là 2022
             this.$el.querySelectorAll(".paging-list__list").forEach((item) => {
                 item.classList.remove('paging-selected');
-                if (item.getAttribute("value") == "20"){
+                if (item.getAttribute("value") == "20") {
                     item.classList.add('paging-selected');
                     this.$el.querySelector(".paging-input__input").value = item.innerHTML;
                 }
@@ -330,7 +345,6 @@ export default {
 
             // Load lại trang và đưa ra thông báo
             this.filterEmployees();
-            this.openToast(3);
         },
         /**
          * Mở bảng option
@@ -424,23 +438,20 @@ export default {
             this.filterEmployees();
         }
     },
-    created() {
-        // Hiệu ứng tối màn hình và loader
-        this.showOver = true;
+    created(){
+        // Bật hiệu ứng loading và tối màn hình
         this.showLoader = true;
+        this.showOver = true;
+        setTimeout(() => {
+            this.showOver = false;
+            this.showLoader = false;
+        }, 1500);
     },
     mounted() {
         setTimeout(() => {
             // Thực hiện lấy dữ liệu Employee
             try {
-                let status = this.filterEmployees();
-                if (status != 400 && status != 0 && status != 500) {
-                    this.openToast(3);
-                } else {
-                    this.openToast(4);
-                }
-                this.showLoader = false;
-                this.showOver = false;
+                this.filterEmployees();
             } catch (ex) {
                 console.log(ex);
             }

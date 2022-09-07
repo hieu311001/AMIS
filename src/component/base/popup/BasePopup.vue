@@ -49,7 +49,7 @@ export default {
 
 .popup-top {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
 }
 
 .popup-icon {
@@ -58,12 +58,14 @@ export default {
     min-width: 48px;
     min-height: 48px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
 }
 
 .popup-text{
     overflow: auto;
     max-height: 400px;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
     padding-left: 16px;
     padding-top: 12px;
 }
