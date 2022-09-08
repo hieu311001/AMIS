@@ -241,6 +241,7 @@ export default {
             toast: 0,
             dateOfBirth: "",
             identityDate: "",
+            prevEmployee: {},
         }
     },
     methods: {
@@ -361,6 +362,40 @@ export default {
             }
 
             return employee;
+        },
+        async bindingDataForm(employeeData) {
+            let me = this.$el;
+            // Lưu dữ liệu employee vào prevEmp
+            this.prevEmployee = employeeData;
+            // Binding dữ liệu ra các ô input
+            if (employeeData.DateOfBirth) {
+                    this.dateOfBirth = employeeData.DateOfBirth;
+                }
+                if (employeeData.IdentityDate) {
+                    this.identityDate = employeeData.IdentityDate;
+                }
+
+                me.querySelector("#employeeCode").value = employeeData.EmployeeCode;
+                me.querySelector("#employeeName").value = employeeData.EmployeeName;
+                me.querySelector("#positionName").value = employeeData.PositionName;
+                me.querySelector("#identityNumber").value = employeeData.IdentityNumber;
+                me.querySelector("#identityPlace").value = employeeData.IdentityPlace;
+                me.querySelector("#address").value = employeeData.Address;
+                me.querySelector("#phoneNumber").value = employeeData.PhoneNumber;
+                me.querySelector("#email").value = employeeData.Email;
+                me.querySelector("#bankBranch").value = employeeData.BankBranch;
+                me.querySelector("#bankName").value = employeeData.BankName;
+                me.querySelector("#bankAccount").value = employeeData.BankAccount;
+                me.querySelector("#hotLine").value = employeeData.HotLine;
+                
+                if (employeeData.DepartmentID) {
+                    let department = await getDepartment(employeeData.DepartmentID);
+
+                    me.querySelector("#departmentName input").value = department.DepartmentName;
+                    me.querySelector("#departmentName").value = employeeData.DepartmentID;
+                }
+
+                this.gender = employeeData.Gender.toString();
         },
         /**
          * 3.1 Cất dữ liệu
@@ -501,6 +536,11 @@ export default {
                     this.resetForm();
                 }
             } else if (this.CurrentFormMode == this.FormMode.Edit) {
+                let employee = this.getDataForm();
+
+                console.log(employee);
+                console.log(this.prevEmployee);
+
                 this.$emit("handleCloseForm");
                 this.emitter.emit("closeForm");
                 this.resetForm();
@@ -588,43 +628,28 @@ export default {
              * Bắt sự kiện ấn nút mở form sửa
              */
             this.emitter.on("openEditForm", async (employeeData) => {
-                let me = this.$el;
                 this.showForm = true;
                 
                 // Đổi sang mode sửa
                 this.CurrentFormMode = this.FormMode.Edit;
                 // Lưu id của nhân viên cần sửa
                 this.employeeID = employeeData.EmployeeID;
-
-                // Binding dữ liệu ra các ô input
-                if (employeeData.DateOfBirth) {
-                    this.dateOfBirth = employeeData.DateOfBirth;
-                }
-                if (employeeData.IdentityDate) {
-                    this.identityDate = employeeData.IdentityDate;
-                }
-
-                me.querySelector("#employeeCode").value = employeeData.EmployeeCode;
-                me.querySelector("#employeeName").value = employeeData.EmployeeName;
-                me.querySelector("#positionName").value = employeeData.PositionName;
-                me.querySelector("#identityNumber").value = employeeData.IdentityNumber;
-                me.querySelector("#identityPlace").value = employeeData.IdentityPlace;
-                me.querySelector("#address").value = employeeData.Address;
-                me.querySelector("#phoneNumber").value = employeeData.PhoneNumber;
-                me.querySelector("#email").value = employeeData.Email;
-                me.querySelector("#bankBranch").value = employeeData.BankBranch;
-                me.querySelector("#bankName").value = employeeData.BankName;
-                me.querySelector("#bankAccount").value = employeeData.BankAccount;
-                me.querySelector("#hotLine").value = employeeData.HotLine;
                 
-                if (employeeData.DepartmentID) {
-                    let department = await getDepartment(employeeData.DepartmentID);
+                // Binding dữ liệu
+                this.bindingDataForm(employeeData);
+            })
+            /**
+             * Bắt sự kiện ấn nút nhân bản 
+             */
+            this.emitter.on("openCloneForm", async (dataForm) => {
+                this.showForm = true;
+                // Binding dữ liệu
+                this.bindingDataForm(dataForm);
 
-                    me.querySelector("#departmentName input").value = department.DepartmentName;
-                    me.querySelector("#departmentName").value = employeeData.DepartmentID;
-                }
-
-                this.gender = employeeData.Gender.toString();
+                // Binding mã code lớn nhất
+                let response = await getEmployeeMaxCode();
+                this.$el.querySelector("#employeeCode").value = response['data'];
+                this.$el.querySelector("#employeeCode").focus();
             })
             /**
              * Lắng nghe sự kiện ấn nút đóng form

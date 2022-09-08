@@ -9,17 +9,27 @@
         </div>
         <div class="main-body">
             <div class="main-body__filter">
-                <div class="ms-input filter-input">
-                    <!-- <BaseInput Class="ms-input filter-input" inputClass="input-search filter-input__search" placeholder="Tìm kiếm theo tên, mã nhân viên">
-                    <div class="input-search__icon"></div>
-                </BaseInput> -->
-                    <div class="ms-input filter-input">
-                        <input id="input-search" type="text" @change="handleSearchChange" placeholder="Tìm kiếm theo tên, mã nhân viên" class="input-search filter-input__search">
-                        <div class="input-search__icon"></div>
+                <div class="body-deleteAll">
+                    <button class="btn-deleteAll">
+                        <div class="btn-deleteAll__text">
+                            Thực hiện hàng loạt
+                        </div>
+                        <div class="btn-deleteAll__icon icon icon-department__arrow"></div>
+                    </button>
+                    <div class="list-option" v-if="deleteAll">
+                        <div class="option-deleteAll">Xóa</div>
                     </div>
                 </div>
-                <div class="btn-refresh">
-                    <div class="icon-refresh icon" @click="refresh"></div>
+                <div class="body-filter">
+                    <div class="ms-input filter-input">
+                        <div class="ms-input filter-input">
+                            <input id="input-search" type="text" @change="handleSearchChange" placeholder="Tìm kiếm theo tên, mã nhân viên" class="input-search filter-input__search">
+                            <div class="input-search__icon"></div>
+                        </div>
+                    </div>
+                    <div class="btn-refresh">
+                        <div class="icon-refresh icon" @click="refresh"></div>
+                    </div>
                 </div>
             </div>
             <div class="main-body__table" id="EmployeeTable">
@@ -28,7 +38,7 @@
                         <tr class="table-tr">
                             <th class="table-th space-left"></th>
                             <th class="table-th checkbox">
-                                <input type="checkbox" class="input__checkbox">
+                                <input type="checkbox" class="input__checkbox" id="checkboxAll" @click="handleCheckboxAll">
                             </th>
                             <th class="table-th">MÃ NHÂN VIÊN</th>
                             <th class="table-th">TÊN NHÂN VIÊN</th>
@@ -48,7 +58,7 @@
                         <tr v-for="emp in employees" :key="emp.EmployeeID" class="table-tr selectedRow" @dblclick="handleEdit(emp.EmployeeID)">
                             <td class="table-td space-left"></td>
                             <td class="table-td checkbox" @dblclick.stop="handle">
-                                <input type="checkbox" class="input__checkbox" @click="handleCheckbox">
+                                <input type="checkbox" name="selectedRecord" class="input__checkbox" @click="handleCheckbox" @click.stop="">
                             </td>
                             <td class="table-td">{{ emp.EmployeeCode }}</td>
                             <td class="table-td">{{ emp.EmployeeName }}</td>
@@ -103,7 +113,7 @@
         </div>
     </div>
     <div class="task-combobox" ref="taskCombobox" v-show="showOption">
-        <div class="task-btn__clone">Nhân bản</div>
+        <div class="task-btn__clone" @click="handleClone">Nhân bản</div>
         <div class="task-btn__delete" @click="handleDelete">Xóa</div>
         <div class="task-btn__stop">Ngừng sử dụng</div>
     </div>
@@ -157,13 +167,13 @@ export default {
     },
     data() {
         return {
-            employees: [],
-            isShowForm: false,
-            showOver: false,
-            showLoader: false,
+            employees: [],           // Đối tượng employee
+            isShowForm: false,       // Ẩn hiện form
+            showOver: false,         // Hiệu ứng tối màn hình
+            showLoader: false,       // Hiệu ứng loading
 
-            totalEmployee: 120,
-            dataForm: [],
+            totalEmployee: 120,      // Tống số bản ghi
+            dataForm: [],               
             showOption: false,
             employeeId: "",
             employeeCode: "",
@@ -175,6 +185,7 @@ export default {
             searchKeywords: "",
             totalPage: "",
             showResult: true,
+            deleteAll: true,
         };
     },
     components: {
@@ -208,26 +219,30 @@ export default {
          * Created by VMHIEU 04/08/2022
          */
         async filterEmployees() {
-            let list = await filterEmployees(this.searchKeywords, this.pageSize, this.pageNumber);
+            try{
+                let list = await filterEmployees(this.searchKeywords, this.pageSize, this.pageNumber);
 
-            // Thực hiện nếu lấy dữ liệu thành công
-            if (list == 400 || list == 0) {
-                this.openToast(4);
-                this.showResult = false;
-            } else {
-                this.openToast(3);
-                this.employees = list["Data"];
-                this.totalEmployee = list["TotalCount"];
-                this.totalPage = Math.round(this.totalEmployee * 10 / parseInt(this.pageSize));
-
-                if(this.totalEmployee == 0) {
+                // Thực hiện nếu lấy dữ liệu thành công
+                if (list == 400 || list == 0) {
+                    this.openToast(4);
                     this.showResult = false;
                 } else {
-                    this.showResult = true;
-                }
-            }
+                    this.openToast(3);
+                    this.employees = list["Data"];
+                    this.totalEmployee = list["TotalCount"];
+                    this.totalPage = Math.round(this.totalEmployee * 10 / parseInt(this.pageSize));
 
-            return list;
+                    if(this.totalEmployee == 0) {
+                        this.showResult = false;
+                    } else {
+                        this.showResult = true;
+                    }
+                }
+
+                return list;
+            } catch (ex) {
+                console.error(ex);
+            }
         },
         /**
          * Mở Form Thông Tin Nhân Viên
@@ -267,9 +282,13 @@ export default {
          * Load lại table khi ấn vào nút cất 
          */
         async resetTable() {
-            let list = this.filterEmployees();
+            try{
+                let list = this.filterEmployees();
 
-            this.employees = list;
+                this.employees = list;
+            } catch(ex) {
+                console.log(ex);
+            }         
         },
         /**
          * Format ngày tháng
@@ -345,6 +364,12 @@ export default {
 
             // Load lại trang và đưa ra thông báo
             this.filterEmployees();
+
+            // Ẩn hiệu ứng loading và tối màn hình
+            setTimeout(() => {
+                this.showOver = false;
+                this.showLoader = false;
+            }, 500);        
         },
         /**
          * Mở bảng option
@@ -368,12 +393,28 @@ export default {
          * Click vào nút xóa
          * CreatedBy VMHieu 08/08/2022
          */
-        async handleDelete() {
+        handleDelete() {
             this.emitter.emit("openPopupDelete", this.employeeCode);
             this.popup = 1;
 
             this.showOver = true;
             this.showOption = false;
+        },
+        /**
+         * Mở form nhân bản 
+         * CreatedBy VMHieu 08/09/2022
+         */
+        async handleClone() {
+            try {
+                this.showOver = true;
+                this.showOption = false;
+
+                // Lấy id của nhân viên cần sửa gửi xuống component Form
+                let dataForm = await getEmployee(this.employeeId);
+                this.emitter.emit("openCloneForm", dataForm);
+            } catch (e) {
+                console.error(e);
+            }
         },
         /**
          * Mở toastMessage
@@ -412,10 +453,13 @@ export default {
                     items.classList.remove("paging-selected");
                 })
 
+                // Style cho số bản ghi được chọn
                 item.classList.add('paging-selected');
                 this.$el.querySelector(".paging-input__input").value = item.innerHTML;
 
                 this.pageSize = item.getAttribute("value");
+
+                // Tải lại trang khi thay đổi số bản ghi
                 this.filterEmployees();
             }
 
@@ -436,6 +480,84 @@ export default {
 
             this.searchKeywords = item.value;
             this.filterEmployees();
+        },
+        /**
+         * Sự kiện chọn tất cả bản ghi qua ô checkboxAll
+         * CreatedBy VMHieu 08/09/2022
+         */ 
+         handleCheckboxAll(event) {
+            // Xét tbody của bảng:
+            let tbody = event.target.closest("table").childNodes[1];
+
+            // Xét tất cả các checkbox trừ checkAll:
+            let records = tbody.querySelectorAll("[name='selectedRecord']");
+
+            // Chọn tất cả các bản ghi, hiển thị nút xóa hàng loạt
+            if (event.target.checked) {
+                records.forEach((record) => {
+                    record.checked = event.target.checked;
+                    record.closest("tr").classList.add("selected-row");
+                })
+            }
+            // Bỏ chọn tất cả các bản ghi, ẩn nút xóa hàng loạt
+            else {
+                records.forEach((record) => {
+                    record.checked = event.target.checked;
+                    record.closest("tr").classList.remove("selected-row");
+                })
+            }
+
+            records.forEach((record) => {
+                // Tick / Untick checkbox theo checkAll:
+                record.checked = event.target.checked;
+
+                // Đánh dấu bản ghi nếu checkAll == true:
+                if (event.target.checked) {
+                    record.closest("tr").classList.add("selected-row");
+                }
+
+                // Bỏ đánh dấu bản ghi nếu checkAll == false:
+                else {
+                    record.closest("tr").classList.remove("selected-row");
+                }
+            })
+        },
+        /**
+         * Sự kiện chọn 1 bản ghi qua ô checkbox 
+         * CreatedBy VMHieu 08/09/2022
+         */
+        handleCheckbox(event) {
+            // Ngăn sự kiện lan lên parent:
+            event.stopPropagation();
+
+            // Xét bảng hiện tại:
+            let table = event.target.closest("table");
+
+            // Xét tất cả các checkbox:
+            let records = table.querySelectorAll("[name='selectedRecord']");
+
+            if (event.target.checked) {
+                // Đánh dấu bản ghi:
+                event.target.closest("tr").classList.add("selected-row");
+
+                // Đặt checkAll bằng true:
+                table.querySelector("#checkboxAll").checked = true;
+
+                // Bỏ checkAll nếu có một checkbox chưa check:
+                for (var record of records) {
+                    if (!record.checked) {
+                        table.querySelector("#checkboxAll").checked = false;
+                        break;
+                    }
+                }
+            }
+            else {
+                // Bỏ đánh dấu bản ghi:
+                event.target.closest("tr").classList.remove("selected-row");
+
+                // Đặt checkAll bằng false:
+                table.querySelector("#checkboxAll").checked = false;
+            }
         }
     },
     created(){
@@ -554,9 +676,19 @@ export default {
 .main-body__filter {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     background-color: #fff;
     padding: 16px;
+    padding-bottom: 32px;
+}
+
+.body-deleteAll{
+
+}
+
+.body-filter {
+    display: flex;
+    align-items: center;
 }
 
 .filter-input {
@@ -584,7 +716,7 @@ export default {
 .main-body__table {
     width: 100%;
     overflow: auto;
-    max-height: calc(100vh - 240px);
+    max-height: calc(100vh - 260px);
 }
 
 #EmployeeTable::-webkit-scrollbar {
@@ -738,6 +870,40 @@ export default {
 .paging-selected {
     background-color: #2ca01c !important;
     color: #fff !important;
+}
+
+.btn-deleteAll{
+    display: flex;
+    align-items: center;
+    border: 2px solid #3b3c3f;
+    border-radius: 30px;
+    height: 36px;
+    padding: 6px 16px;
+    cursor: pointer;
+    background-color: #fff;
+    position: relative;
+}
+
+.btn-deleteAll:hover, .btn-deleteAll:active{
+    background-color: #ebedf0;
+}
+
+.btn-deleteAll__text{
+    font-weight: 600;
+    position: relative;
+    color: inherit;
+    display: inline-block;
+    transition: all .25s ease;
+    white-space: nowrap;
+    font-size: 13px;
+    line-height: 13px;
+    padding-right: 4px;
+}
+
+.option-deleteAll{
+    height: 36px;
+    position: absolute;
+    border: 1px solid #fff;
 }
 
 .form-enter-from,

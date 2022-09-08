@@ -236,4 +236,19 @@ thead .task{
     padding-left: 20px;
 }
 
+.employee-table .selected-row {
+    background-color: #e5f3ff !important;
+}
+
+
+.employee-table .selected-row td:first-child{
+    background-color: #fff;
+}
+
+.employee-table .selected-row td:nth-child(2),
+.employee-table .selected-row td:nth-child(3),
+.employee-table .selected-row td.task,
+.employee-table .selected-row td.task button{
+    background-color: #e5f3ff !important;
+}
 
