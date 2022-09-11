@@ -107,6 +107,14 @@
     background: url(../assets/Sprites.5c668001.png) no-repeat -1097px -88px;
 }
 
+.icon-export{
+    background: url('../assets/Sprites.5c668001.png') no-repeat -704px -201px;
+}
+
+.icon-export:hover{
+    background: url('../assets/Sprites.5c668001.png') no-repeat -704px -256px;
+}
+
 .icon-close{
     background: url(../assets/Sprites.5c668001.png) no-repeat -144px -144px;
 }

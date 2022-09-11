@@ -109,6 +109,10 @@ export default {
             this.emitter.on("openPopupDelete", (code) => {
                 this.msg = `Bạn có thực sự muốn xóa Nhân viên <${code}> không?`;
             })
+            // Bắt sự kiện ấn nút xóa nhiều
+            this.emitter.on("openMultipleDelete", () => {
+                this.msg = `Bạn có thực sự muốn xóa những nhân viên đã chọn hay không?`;
+            })
             // Bắt sự kiện ấn nút validate form 
             this.emitter.on("openPopupError", (data) => {
                 for(let i = 0; i < data.length; i++){

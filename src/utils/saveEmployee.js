@@ -62,3 +62,26 @@ export async function deleteEmployee(id) {
 
     return status;
 }
+
+/**
+ * Call api xóa nhiều bản ghi cùng lúc
+ * @param {Mảng id của nhân viên cần xóa} dataId 
+ * @returns Status code
+ * CreatedBy VMHieu 09/09/2022
+ */
+export async function deleteMultiple(dataId) {
+    let status;
+
+    if(dataId){
+        await axios.delete(`https://localhost:7050/api/v1/Employees/deleteMultiple?ids=${dataId}`)
+        .then(function (response) {
+            status = response.status;
+        })
+        .catch(function (error) {
+            status = error.response.status;
+        })
+    }
+
+    return status;
+}
+

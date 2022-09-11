@@ -530,6 +530,7 @@ export default {
                         this.showOverForm = true;
                     } 
                 })
+                // Nếu không có thay đổi thì thực hiện đóng và reset form
                 if (this.popup == 0) {
                     this.$emit("handleCloseForm");
                     this.emitter.emit("closeForm");

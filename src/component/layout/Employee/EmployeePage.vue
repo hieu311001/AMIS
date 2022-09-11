@@ -10,13 +10,13 @@
         <div class="main-body">
             <div class="main-body__filter">
                 <div class="body-deleteAll">
-                    <button class="btn-deleteAll">
+                    <button class="btn-deleteAll" @click="handleOpenDeleteAll" :disabled="disableDeleteAll">
                         <div class="btn-deleteAll__text">
                             Thực hiện hàng loạt
                         </div>
                         <div class="btn-deleteAll__icon icon icon-department__arrow"></div>
                     </button>
-                    <div class="list-option" v-if="deleteAll">
+                    <div class="list-option" v-if="deleteAll" @click="handleDeleteAll">
                         <div class="option-deleteAll">Xóa</div>
                     </div>
                 </div>
@@ -29,6 +29,9 @@
                     </div>
                     <div class="btn-refresh">
                         <div class="icon-refresh icon" @click="refresh"></div>
+                    </div>
+                    <div class="btn-export">
+                        <div class="icon-export icon" @click="exportExcel"></div>
                     </div>
                 </div>
             </div>
@@ -157,7 +160,8 @@ import {
     getEmployee
 } from '@/utils/getEmployee';
 import {
-    deleteEmployee
+    deleteEmployee,
+    deleteMultiple
 } from '@/utils/saveEmployee';
 
 export default {
@@ -167,13 +171,14 @@ export default {
     },
     data() {
         return {
-            employees: [],           // Đối tượng employee
-            isShowForm: false,       // Ẩn hiện form
-            showOver: false,         // Hiệu ứng tối màn hình
-            showLoader: false,       // Hiệu ứng loading
+            employees: [], // Đối tượng employee
+            isShowForm: false, // Ẩn hiện form
+            showOver: false, // Hiệu ứng tối màn hình
+            showLoader: false, // Hiệu ứng loading
 
-            totalEmployee: 120,      // Tống số bản ghi
-            dataForm: [],               
+            totalEmployee: 120, // Tống số bản ghi
+            dataForm: [],
+            dataId: [],
             showOption: false,
             employeeId: "",
             employeeCode: "",
@@ -185,7 +190,13 @@ export default {
             searchKeywords: "",
             totalPage: "",
             showResult: true,
-            deleteAll: true,
+            deleteAll: false,
+            disableDeleteAll: true,
+            EmpMode: {
+                Delete: 1, // Xóa 1 bản ghi
+                DeleteAll: 2 // Xóa nhiều bản ghi
+            },
+            recordMode: 0,
         };
     },
     components: {
@@ -219,7 +230,8 @@ export default {
          * Created by VMHIEU 04/08/2022
          */
         async filterEmployees() {
-            try{
+            try {
+                // Cho về đầu trang
                 let list = await filterEmployees(this.searchKeywords, this.pageSize, this.pageNumber);
 
                 // Thực hiện nếu lấy dữ liệu thành công
@@ -232,7 +244,7 @@ export default {
                     this.totalEmployee = list["TotalCount"];
                     this.totalPage = Math.round(this.totalEmployee * 10 / parseInt(this.pageSize));
 
-                    if(this.totalEmployee == 0) {
+                    if (this.totalEmployee == 0) {
                         this.showResult = false;
                     } else {
                         this.showResult = true;
@@ -282,13 +294,13 @@ export default {
          * Load lại table khi ấn vào nút cất 
          */
         async resetTable() {
-            try{
+            try {
                 let list = this.filterEmployees();
 
                 this.employees = list;
-            } catch(ex) {
+            } catch (ex) {
                 console.log(ex);
-            }         
+            }
         },
         /**
          * Format ngày tháng
@@ -369,7 +381,18 @@ export default {
             setTimeout(() => {
                 this.showOver = false;
                 this.showLoader = false;
-            }, 500);        
+            }, 500);
+        },
+        /**
+         * Xuất file Excel
+         * CreatedBy VMHieu 10/09/2022
+         */
+        async exportExcel() {
+            try {
+                window.open(`https://localhost:7050/api/v1/Employees/Export?keyword=${this.searchKeywords}`, 'Download')
+            } catch (e) {
+                console.log(e);
+            }
         },
         /**
          * Mở bảng option
@@ -396,6 +419,7 @@ export default {
         handleDelete() {
             this.emitter.emit("openPopupDelete", this.employeeCode);
             this.popup = 1;
+            this.recordMode = this.EmpMode.Delete;
 
             this.showOver = true;
             this.showOption = false;
@@ -432,6 +456,7 @@ export default {
          * Sự kiện ấn nút mũi tên phân trang
          */
         handleClickArrow(event) {
+            // Ẩn hiện combobox 
             this.$refs.pagingArrow.classList.toggle("up");
             this.paging = !this.paging;
 
@@ -484,8 +509,8 @@ export default {
         /**
          * Sự kiện chọn tất cả bản ghi qua ô checkboxAll
          * CreatedBy VMHieu 08/09/2022
-         */ 
-         handleCheckboxAll(event) {
+         */
+        handleCheckboxAll(event) {
             // Xét tbody của bảng:
             let tbody = event.target.closest("table").childNodes[1];
 
@@ -494,6 +519,7 @@ export default {
 
             // Chọn tất cả các bản ghi, hiển thị nút xóa hàng loạt
             if (event.target.checked) {
+                this.disableDeleteAll = false;
                 records.forEach((record) => {
                     record.checked = event.target.checked;
                     record.closest("tr").classList.add("selected-row");
@@ -501,6 +527,8 @@ export default {
             }
             // Bỏ chọn tất cả các bản ghi, ẩn nút xóa hàng loạt
             else {
+                this.disableDeleteAll = true;
+                this.deleteAll = false;
                 records.forEach((record) => {
                     record.checked = event.target.checked;
                     record.closest("tr").classList.remove("selected-row");
@@ -532,11 +560,13 @@ export default {
 
             // Xét bảng hiện tại:
             let table = event.target.closest("table");
+            let flag = 0;
 
             // Xét tất cả các checkbox:
             let records = table.querySelectorAll("[name='selectedRecord']");
 
             if (event.target.checked) {
+                this.disableDeleteAll = false;
                 // Đánh dấu bản ghi:
                 event.target.closest("tr").classList.add("selected-row");
 
@@ -550,20 +580,62 @@ export default {
                         break;
                     }
                 }
-            }
-            else {
+            } else {
                 // Bỏ đánh dấu bản ghi:
                 event.target.closest("tr").classList.remove("selected-row");
 
                 // Đặt checkAll bằng false:
                 table.querySelector("#checkboxAll").checked = false;
             }
+
+            // Duyệt tất cả checkbox để kiểm tra có checkbox nào đang được tick hay không
+            for (var idx of records) {
+                if (idx.checked) {
+                    flag = 1;
+                }
+            }
+
+            // Nếu có checkbox = true thì hiện nút xóa hàng loạt
+            if (flag == 1) {
+                this.disableDeleteAll = false;
+            } else {
+                this.disableDeleteAll = true;
+                this.deleteAll = false;
+            }
+        },
+        /**
+         * Mở option deleteAll
+         * CreatedBy VMHieu 08/09/2022
+         */
+        handleOpenDeleteAll() {
+            this.deleteAll = !this.deleteAll;
+        },
+        /**
+         * Thực hiện xóa các bản ghi được Chọn
+         * CreatedBy VMHieu 10/09/2022
+         */
+        async handleDeleteAll(){
+            let data = [];
+            // Lấy id của các bản ghi được select
+            this.$el.querySelectorAll(".selected-row").forEach((select) => {
+                data.push(select.__vnode.key);
+                this.dataId = data.join("/");
+            })
+
+            // Hiển thị thông báo xác nhận xóa
+            this.popup = 1;
+            this.showOver = true;
+            this.emitter.emit("openMultipleDelete");
+
+            // Chuyên sang mode xóa nhiều
+            this.recordMode = this.EmpMode.DeleteAll;
         }
     },
-    created(){
+    created() {
         // Bật hiệu ứng loading và tối màn hình
         this.showLoader = true;
         this.showOver = true;
+        // Ẩn hiệu ứng sau 1500ms
         setTimeout(() => {
             this.showOver = false;
             this.showLoader = false;
@@ -588,16 +660,29 @@ export default {
              * CreatedBy VMHieu 10/08/2022
              */
             this.emitter.on("closePopup", async (val) => {
+                let status;
                     if (val == 3) {
-                        let status = await deleteEmployee(this.employeeId);
+                        if(this.recordMode == 1){
+                            status = await deleteEmployee(this.employeeId);
+                        } else if (this.recordMode == 2){
+                            status = await await deleteMultiple(this.dataId);
+                        }
 
                         if (status == 200) {
                             // Bật hiệu ứng tối màn hình và loader
                             this.showOver = true;
                             this.showLoader = true;
+
+                            setTimeout(() => {
+                                this.showOver = false;
+                                this.showLoader = false;
+                            }, 1000);
                             // Load lại table
-                            this.loadEmployees();
+                            this.filterEmployees();
                             this.showOption = false;
+                            // Ẩn nút xóa nhiều
+                            this.deleteAll = false;
+                            this.disableDeleteAll = true;
                             // Hiện toast trong 2s
                             this.openToast(2);
                         } else {
@@ -682,9 +767,7 @@ export default {
     padding-bottom: 32px;
 }
 
-.body-deleteAll{
-
-}
+.body-deleteAll {}
 
 .body-filter {
     display: flex;
@@ -693,7 +776,7 @@ export default {
 
 .filter-input {
     width: 240px;
-    margin-right: 10px;
+    margin-right: 8px;
 }
 
 .filter-input__search {
@@ -708,7 +791,8 @@ export default {
     border-color: #2ca01c !important;
 }
 
-.btn-refresh {
+.btn-refresh,
+.btn-export {
     padding: 0 6px;
     cursor: pointer;
 }
@@ -872,7 +956,11 @@ export default {
     color: #fff !important;
 }
 
-.btn-deleteAll{
+.body-deleteAll {
+    position: relative;
+}
+
+.btn-deleteAll {
     display: flex;
     align-items: center;
     border: 2px solid #3b3c3f;
@@ -881,14 +969,14 @@ export default {
     padding: 6px 16px;
     cursor: pointer;
     background-color: #fff;
-    position: relative;
 }
 
-.btn-deleteAll:hover, .btn-deleteAll:active{
+.btn-deleteAll:hover,
+.btn-deleteAll:active {
     background-color: #ebedf0;
 }
 
-.btn-deleteAll__text{
+.btn-deleteAll__text {
     font-weight: 600;
     position: relative;
     color: inherit;
@@ -900,10 +988,22 @@ export default {
     padding-right: 4px;
 }
 
-.option-deleteAll{
-    height: 36px;
+.list-option {
     position: absolute;
-    border: 1px solid #fff;
+    right: 10px;
+}
+
+.option-deleteAll {
+    width: 80px;
+    height: 18px;
+    border: 1px solid #babec5;
+    z-index: 100;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.option-deleteAll:hover {
+    background-color: #ebedf0;
 }
 
 .form-enter-from,
